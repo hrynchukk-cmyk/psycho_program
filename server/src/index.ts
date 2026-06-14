@@ -16,6 +16,15 @@ import { deliveriesRouter } from './routes/deliveries.js'
 
 const app = express()
 
+// Private Network Access: Chrome для запиту з публічного сайту (https) на
+// локальну мережу/localhost вимагає цей заголовок у відповіді на preflight.
+app.use((req, res, next) => {
+  if (req.headers['access-control-request-private-network']) {
+    res.setHeader('Access-Control-Allow-Private-Network', 'true')
+  }
+  next()
+})
+
 // CORS. Авторизація на Bearer-токенах (без кукі), тож для демо безпечно
 // дозволити будь-яке джерело (CORS_ORIGINS="*"). Можна обмежити списком доменів.
 const allowAllOrigins = env.corsOrigins.includes('*')
