@@ -11,7 +11,8 @@ export const env = {
   jwtSecret: required('JWT_SECRET', 'change-me-in-production'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   port: Number(process.env.PORT ?? 4000),
-  corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:4173')
+  // За замовчуванням дозволяємо всі джерела (демо). Обмежте списком у проді.
+  corsOrigins: (process.env.CORS_ORIGINS ?? '*')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean),

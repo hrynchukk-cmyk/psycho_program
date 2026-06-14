@@ -16,12 +16,18 @@ import { deliveriesRouter } from './routes/deliveries.js'
 
 const app = express()
 
+// CORS. Авторизація на Bearer-токенах (без кукі), тож для демо безпечно
+// дозволити будь-яке джерело (CORS_ORIGINS="*"). Можна обмежити списком доменів.
+const allowAllOrigins = env.corsOrigins.includes('*')
 app.use(
   cors({
     origin(origin, callback) {
-      // Дозволяємо запити без Origin (curl, мобільні застосунки) і зі списку дозволених.
-      if (!origin || env.corsOrigins.includes(origin)) return callback(null, true)
-      callback(new Error(`CORS: джерело ${origin} не дозволено`))
+      // Запити без Origin (curl, мобільні застосунки) дозволені завжди.
+      if (allowAllOrigins || !origin || env.corsOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+      // Не кидаємо помилку (це давало б 500 на preflight) — просто без CORS-заголовків.
+      callback(null, false)
     },
   }),
 )

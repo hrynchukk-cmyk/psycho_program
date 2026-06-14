@@ -27,8 +27,9 @@ services:
         value: 7d
       - key: PORT
         value: 4000
-      # Додайте сюди адресу свого фронтенду.
+      # "*" дозволяє будь-яке джерело (демо). Можна звузити до списку доменів,
+      # напр.: https://psycho-program.vercel.app,https://psychoprogram.com
       - key: CORS_ORIGINS
-        value: https://psychoprogram.com,https://hrynchukk-cmyk.github.io,http://localhost:5173
+        value: "*"
       - key: NODE_VERSION
         value: 22
