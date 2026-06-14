@@ -1,0 +1,307 @@
+// Psycho Program — схема бази даних (PostgreSQL).
+// Модель розрахована на кількох психологів: кожна сутність верхнього рівня
+// належить психологу (practitionerId). Клієнти можуть мати власний акаунт для
+// мобільного додатка, через який залишають записи у щоденнику.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PRACTITIONER
+  CLIENT
+}
+
+enum ClientStatus {
+  INVITED
+  ACTIVE
+  ARCHIVED
+}
+
+enum ElementType {
+  SECTION
+  TEXT
+  SHORT_ANSWER
+  LONG_ANSWER
+  MULTIPLE_CHOICE
+  SCALE
+  VIDEO
+  IMAGE
+  PAGE_BREAK
+}
+
+enum DeliveryMode {
+  IMMEDIATELY
+  AFTER_PREVIOUS
+  AFTER_START
+}
+
+enum ResourceKind {
+  FILE
+  LINK
+}
+
+enum DeliveryKind {
+  ACTIVITY
+  PROGRAM
+}
+
+enum DeliveryStatus {
+  SENT
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Mood {
+  GREAT
+  GOOD
+  NEUTRAL
+  LOW
+  BAD
+}
+
+enum CommentAuthor {
+  PRACTITIONER
+  CLIENT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  firstName    String
+  lastName     String
+  createdAt    DateTime @default(now())
+
+  // Клієнти, якими володіє цей користувач (якщо він психолог).
+  clients    Client[] @relation("PractitionerClients")
+  groups     Group[]
+  activities Activity[]
+  programs   Program[]
+  resources  Resource[]
+  tasks      Task[]
+  notes      Note[]
+
+  // Якщо цей користувач — клієнт, тут його профіль у психолога.
+  clientProfile Client? @relation("ClientUser")
+}
+
+model Client {
+  id        String       @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String
+  status    ClientStatus @default(INVITED)
+  createdAt DateTime     @default(now())
+
+  practitionerId String
+  practitioner   User   @relation("PractitionerClients", fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  // Акаунт клієнта для мобільного додатка (необов'язковий, поки не прийняв запрошення).
+  userId String? @unique
+  user   User?   @relation("ClientUser", fields: [userId], references: [id], onDelete: SetNull)
+
+  memberships    GroupMember[]
+  journalEntries JournalEntry[]
+  tasks          Task[]
+  notes          Note[]
+  deliveries     Delivery[]
+  resourceShares ResourceShare[]
+
+  @@index([practitionerId])
+}
+
+model Group {
+  id                  String   @id @default(cuid())
+  name                String
+  description         String   @default("")
+  autoSendEnabled     Boolean  @default(false)
+  autoSendActivityIds String[]
+  autoSendProgramIds  String[]
+  createdAt           DateTime @default(now())
+
+  practitionerId String
+  practitioner   User   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  members GroupMember[]
+
+  @@index([practitionerId])
+}
+
+model GroupMember {
+  groupId  String
+  clientId String
+  group    Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, clientId])
+  @@index([clientId])
+}
+
+model Activity {
+  id                String   @id @default(cuid())
+  title             String
+  description       String   @default("")
+  pageBreaksEnabled Boolean  @default(false)
+  isPremade         Boolean  @default(false)
+  category          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // У готового (premade) контенту власника немає.
+  practitionerId String?
+  practitioner   User?   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  elements ActivityElement[]
+
+  @@index([practitionerId])
+}
+
+model ActivityElement {
+  id         String      @id @default(cuid())
+  activityId String
+  activity   Activity    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  type       ElementType
+  title      String      @default("")
+  options    String[]
+  order      Int
+
+  @@index([activityId])
+}
+
+model Program {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  isPremade   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  practitionerId String?
+  practitioner   User?   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  steps ProgramStep[]
+
+  @@index([practitionerId])
+}
+
+model ProgramStep {
+  id         String       @id @default(cuid())
+  programId  String
+  program    Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  activityId String
+  mode       DeliveryMode @default(AFTER_PREVIOUS)
+  days       Int          @default(0)
+  order      Int
+
+  @@index([programId])
+}
+
+model Resource {
+  id        String       @id @default(cuid())
+  kind      ResourceKind
+  name      String
+  url       String?
+  fileType  String?
+  size      String?
+  createdAt DateTime     @default(now())
+
+  practitionerId String
+  practitioner   User   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  shares ResourceShare[]
+
+  @@index([practitionerId])
+}
+
+model ResourceShare {
+  resourceId String
+  clientId   String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, clientId])
+  @@index([clientId])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  done        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  practitionerId String
+  practitioner   User   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([practitionerId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  body      String   @default("")
+  createdAt DateTime @default(now())
+
+  practitionerId String
+  practitioner   User   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([practitionerId])
+}
+
+model JournalEntry {
+  id        String   @id @default(cuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  date      DateTime @default(now())
+  mood      Mood
+  title     String?
+  body      String
+  tags      String[]
+  reviewed  Boolean  @default(false)
+  reply     String?
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+}
+
+model Delivery {
+  id          String         @id @default(cuid())
+  kind        DeliveryKind
+  refId       String
+  clientId    String
+  client      Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  sentAt      DateTime       @default(now())
+  status      DeliveryStatus @default(SENT)
+  completedAt DateTime?
+  responses   Json?
+
+  comments ThreadComment[]
+
+  @@index([clientId])
+}
+
+model ThreadComment {
+  id         String        @id @default(cuid())
+  deliveryId String
+  delivery   Delivery      @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  elementId  String?
+  author     CommentAuthor
+  text       String
+  createdAt  DateTime      @default(now())
+
+  @@index([deliveryId])
+}

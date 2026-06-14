@@ -1,8 +1,12 @@
 # Psycho Program — адмін-панель (прототип для демо)
 
-Прототип адмін-панелі для практиків (психологи, коучі) у стилі Quenza. Працює повністю на мок-даних у пам'яті — бекенд не потрібен.
+Прототип адмін-панелі для практиків (психологи, коучі) у стилі Quenza.
 
-## Запуск
+Репозиторій містить дві частини:
+- **Фронтенд** (корінь репозиторію) — React + TypeScript + Tailwind. Зараз працює на мок-даних у пам'яті, тож демо запускається без бекенду.
+- **Бекенд** (`server/`) — REST API на Node + Express + Prisma + PostgreSQL з авторизацією JWT і ролями психолог/клієнт. Документація: [`server/README.md`](server/README.md).
+
+## Запуск фронтенду
 
 ```bash
 npm install
@@ -10,6 +14,19 @@ npm run dev      # дев-сервер на http://localhost:5173
 npm run build    # продакшн-збірка в dist/
 npm run preview  # перегляд продакшн-збірки
 ```
+
+## Запуск бекенду
+
+```bash
+cd server
+cp .env.example .env   # вкажіть DATABASE_URL і JWT_SECRET
+npm install
+npm run migrate:dev    # створює таблиці
+npm run db:seed        # демо-дані
+npm run dev            # API на http://localhost:4000
+```
+
+Деталі API, ролі та деплой у хмару — у [`server/README.md`](server/README.md). Готовий Render-блупринт: [`render.yaml`](render.yaml).
 
 ## Розділи
 

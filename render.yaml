@@ -1,0 +1,34 @@
+# Render Blueprint — піднімає API-сервіс і керовану PostgreSQL.
+# Як використати: на render.com → New → Blueprint → оберіть цей репозиторій.
+databases:
+  - name: psycho-program-db
+    databaseName: psycho_program
+    plan: free
+
+services:
+  - type: web
+    name: psycho-program-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci && npm run prisma:generate && npm run build
+    # Міграції застосовуються після білда, перед стартом — коли DATABASE_URL уже доступний.
+    preDeployCommand: npm run migrate:deploy
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: psycho-program-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: PORT
+        value: 4000
+      # Додайте сюди адресу свого фронтенду.
+      - key: CORS_ORIGINS
+        value: https://psychoprogram.com,https://hrynchukk-cmyk.github.io,http://localhost:5173
+      - key: NODE_VERSION
+        value: 22
