@@ -15,7 +15,9 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:reset": "prisma migrate reset --force"
+    "db:seed:safe": "SEED_ONLY_IF_EMPTY=1 tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset --force",
+    "start:prod": "prisma migrate deploy && npm run db:seed:safe && node dist/index.js"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

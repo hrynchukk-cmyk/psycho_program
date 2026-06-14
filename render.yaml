@@ -12,9 +12,8 @@ services:
     plan: free
     rootDir: server
     buildCommand: npm ci && npm run prisma:generate && npm run build
-    # Міграції застосовуються після білда, перед стартом — коли DATABASE_URL уже доступний.
-    preDeployCommand: npm run migrate:deploy
-    startCommand: npm start
+    # На старті: застосувати міграції, засіяти демо-дані якщо база порожня, запустити сервер.
+    startCommand: npm run start:prod
     healthCheckPath: /health
     envVars:
       - key: DATABASE_URL

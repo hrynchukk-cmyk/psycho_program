@@ -11,6 +11,11 @@ const daysAgo = (n: number) => {
 const daysAhead = (n: number) => daysAgo(-n)
 
 async function main() {
+  // У режимі автозасіву (на старті в проді) не чіпаємо наявні дані.
+  if (process.env.SEED_ONLY_IF_EMPTY === '1' && (await prisma.user.count()) > 0) {
+    console.log('Демо-дані вже існують — пропускаю засів')
+    return
+  }
   // Очищення в порядку залежностей (ідемпотентний сід).
   await prisma.threadComment.deleteMany()
   await prisma.delivery.deleteMany()
