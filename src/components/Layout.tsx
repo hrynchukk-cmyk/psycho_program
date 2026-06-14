@@ -9,7 +9,9 @@ import {
   StickyNote,
   BookOpen,
   HeartPulse,
+  LogOut,
 } from 'lucide-react'
+import { useStore } from '../data/store'
 
 const nav = [
   { to: '/clients', label: 'Клієнти', icon: Users },
@@ -23,6 +25,8 @@ const nav = [
 ]
 
 export default function Layout() {
+  const { user, logout } = useStore()
+  const initials = user ? `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}` : 'ДП'
   return (
     <div className="flex min-h-screen bg-gray-50">
       <aside className="fixed inset-y-0 left-0 flex w-60 flex-col border-r border-gray-200 bg-white">
@@ -51,16 +55,24 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-gray-200 px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-semibold text-violet-700">
-              ДП
+        <div className="border-t border-gray-200 px-3 py-4">
+          <div className="flex items-center gap-2.5 px-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-semibold uppercase text-violet-700">
+              {initials}
             </span>
-            <div>
-              <div className="text-sm font-medium text-gray-900">Д-р Практик</div>
-              <div className="text-xs text-gray-500">Демо-акаунт</div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-medium text-gray-900">
+                {user ? `${user.firstName} ${user.lastName}` : 'Користувач'}
+              </div>
+              <div className="truncate text-xs text-gray-500">{user?.email}</div>
             </div>
           </div>
+          <button
+            onClick={logout}
+            className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          >
+            <LogOut size={18} /> Вийти
+          </button>
         </div>
       </aside>
       <main className="ml-60 flex-1 px-8 py-8">

@@ -10,6 +10,7 @@ import {
   Image,
   MessageSquare,
   Plus,
+  Save,
   Send,
   Settings,
   SlidersHorizontal,
@@ -63,11 +64,25 @@ export function computePages(a: Activity): ActivityElement[][] {
 
 export default function ActivityBuilderPage() {
   const { id } = useParams()
-  const { activities, updateActivity } = useStore()
+  const { activities, updateActivity, saveActivity } = useStore()
   const activity = activities.find((a) => a.id === id)
   const [showSettings, setShowSettings] = useState(false)
   const [showSend, setShowSend] = useState(false)
   const [showAdd, setShowAdd] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const save = async () => {
+    if (!activity) return
+    setSaving(true)
+    try {
+      await saveActivity(activity)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   if (!activity) return <EmptyState title="Активність не знайдено" />
   if (activity.isPremade)
@@ -122,6 +137,9 @@ export default function ActivityBuilderPage() {
           <>
             <Button variant="secondary" onClick={() => setShowSettings(true)}>
               <Settings size={15} /> Налаштування
+            </Button>
+            <Button variant="secondary" onClick={save} disabled={saving}>
+              <Save size={15} /> {saving ? 'Збереження…' : saved ? 'Збережено ✓' : 'Зберегти'}
             </Button>
             <Button onClick={() => setShowSend(true)}>
               <Send size={15} /> Надіслати

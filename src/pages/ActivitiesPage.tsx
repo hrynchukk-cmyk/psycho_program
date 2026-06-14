@@ -16,8 +16,8 @@ export default function ActivitiesPage() {
   const premade = activities.filter((a) => a.isPremade)
   const list = tab === 'my' ? my : premade
 
-  const createNew = () => {
-    const id = addActivity({
+  const createNew = async () => {
+    const id = await addActivity({
       title: 'Нова активність',
       description: '',
       elements: [],
@@ -27,8 +27,8 @@ export default function ActivitiesPage() {
     navigate(`/activities/${id}`)
   }
 
-  const copyToMy = (id: string) => {
-    copyPremadeActivity(id)
+  const copyToMy = async (id: string) => {
+    await copyPremadeActivity(id)
     setToast('Скопійовано до «Мої активності». Тепер її можна редагувати.')
     setTimeout(() => setToast(''), 3000)
   }

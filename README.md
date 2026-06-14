@@ -3,20 +3,12 @@
 Прототип адмін-панелі для практиків (психологи, коучі) у стилі Quenza.
 
 Репозиторій містить дві частини:
-- **Фронтенд** (корінь репозиторію) — React + TypeScript + Tailwind. Зараз працює на мок-даних у пам'яті, тож демо запускається без бекенду.
+- **Фронтенд** (корінь репозиторію) — React + TypeScript + Tailwind. Працює з реальним API: екран входу, JWT-сесія в `localStorage`, усі дані тягнуться й зберігаються через бекенд.
 - **Бекенд** (`server/`) — REST API на Node + Express + Prisma + PostgreSQL з авторизацією JWT і ролями психолог/клієнт. Документація: [`server/README.md`](server/README.md).
 
-## Запуск фронтенду
+## Запуск (потрібні обидві частини)
 
-```bash
-npm install
-npm run dev      # дев-сервер на http://localhost:5173
-npm run build    # продакшн-збірка в dist/
-npm run preview  # перегляд продакшн-збірки
-```
-
-## Запуск бекенду
-
+**1. Бекенд:**
 ```bash
 cd server
 cp .env.example .env   # вкажіть DATABASE_URL і JWT_SECRET
@@ -26,7 +18,19 @@ npm run db:seed        # демо-дані
 npm run dev            # API на http://localhost:4000
 ```
 
+**2. Фронтенд** (в окремому терміналі, з кореня репозиторію):
+```bash
+npm install
+# за замовчуванням фронтенд звертається до http://localhost:4000;
+# щоб змінити — cp .env.example .env і задайте VITE_API_URL
+npm run dev            # http://localhost:5173
+```
+
+Увійдіть демо-акаунтом психолога: **demo@psychoprogram.com** / **demo1234**.
+
 Деталі API, ролі та деплой у хмару — у [`server/README.md`](server/README.md). Готовий Render-блупринт: [`render.yaml`](render.yaml).
+
+> **Деплой у проді:** фронтенд на GitHub Pages збирається з адресою API зі змінної репозиторію `VITE_API_URL` (Settings → Secrets and variables → Actions → Variables). Поки бекенд не задеплоєний і змінна не задана, опублікований фронтенд намагатиметься звертатися до `localhost:4000`.
 
 ## Розділи
 

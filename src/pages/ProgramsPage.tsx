@@ -16,8 +16,8 @@ export default function ProgramsPage() {
   const premade = programs.filter((p) => p.isPremade)
   const list = tab === 'my' ? my : premade
 
-  const createNew = () => {
-    const id = addProgram({ title: 'Нова програма', description: '', steps: [], isPremade: false })
+  const createNew = async () => {
+    const id = await addProgram({ title: 'Нова програма', description: '', steps: [], isPremade: false })
     navigate(`/programs/${id}`)
   }
 

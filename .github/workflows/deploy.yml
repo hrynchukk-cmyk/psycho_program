@@ -28,6 +28,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # Адреса задеплоєного бекенду. Задайте у Settings → Secrets and
+          # variables → Actions → Variables як VITE_API_URL. Якщо не задано,
+          # фронтенд за замовчуванням звертається до http://localhost:4000.
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
       - uses: actions/configure-pages@v5
         with:
           enablement: true

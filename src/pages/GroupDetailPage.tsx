@@ -8,7 +8,7 @@ import { statusBadge } from './ClientsPage'
 export default function GroupDetailPage() {
   const { id } = useParams()
   const store = useStore()
-  const { groups, clients, activities, programs, sendToClients } = store
+  const { groups, clients, activities, programs } = store
   const group = groups.find((g) => g.id === id)
   const [tab, setTab] = useState('members')
   const [showAddMember, setShowAddMember] = useState(false)
@@ -20,19 +20,14 @@ export default function GroupDetailPage() {
   const myActivities = activities.filter((a) => !a.isPremade)
   const myPrograms = programs.filter((p) => !p.isPremade)
 
-  // Логіка з PDF: при додаванні нового учасника йому автоматично надсилається
-  // увесь контент зі списку авто-надсилання групи.
-  const addMember = (clientId: string) => {
-    store.updateGroup(group.id, { memberIds: [...group.memberIds, clientId] })
-    if (group.autoSendEnabled) {
-      group.autoSendActivityIds.forEach((aid) => sendToClients('activity', aid, [clientId]))
-      group.autoSendProgramIds.forEach((pid) => sendToClients('program', pid, [clientId]))
-    }
+  // Логіка з PDF: при додаванні нового учасника бекенд автоматично надсилає
+  // йому контент зі списку авто-надсилання групи.
+  const addMember = async (clientId: string) => {
+    await store.addGroupMember(group.id, clientId)
     setShowAddMember(false)
   }
 
-  const removeMember = (clientId: string) =>
-    store.updateGroup(group.id, { memberIds: group.memberIds.filter((x) => x !== clientId) })
+  const removeMember = (clientId: string) => store.removeGroupMember(group.id, clientId)
 
   const toggleAutoItem = (kind: 'activity' | 'program', itemId: string) => {
     if (kind === 'activity') {

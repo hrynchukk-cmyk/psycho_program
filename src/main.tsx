@@ -2,8 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createHashRouter, Navigate, RouterProvider } from 'react-router-dom'
 import './index.css'
-import { StoreProvider } from './data/store'
+import { StoreProvider, useStore } from './data/store'
 import Layout from './components/Layout'
+import LoginPage from './pages/LoginPage'
 import ClientsPage from './pages/ClientsPage'
 import ClientDetailPage from './pages/ClientDetailPage'
 import GroupsPage from './pages/GroupsPage'
@@ -40,10 +41,23 @@ const router = createHashRouter([
   },
 ])
 
+function App() {
+  const { ready, authenticated } = useStore()
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-sm text-gray-500">
+        Завантаження…
+      </div>
+    )
+  }
+  if (!authenticated) return <LoginPage />
+  return <RouterProvider router={router} />
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <StoreProvider>
-      <RouterProvider router={router} />
+      <App />
     </StoreProvider>
   </StrictMode>,
 )

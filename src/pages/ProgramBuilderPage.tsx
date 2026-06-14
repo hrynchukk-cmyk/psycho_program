@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowDown, ArrowLeft, ArrowUp, Clock, Plus, Send, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowUp, Clock, Plus, Save, Send, Trash2 } from 'lucide-react'
 import { useStore, uid } from '../data/store'
 import { Button, EmptyState, Field, Modal, PageHeader, inputCls } from '../components/ui'
 import SendModal from '../components/SendModal'
@@ -14,10 +14,24 @@ const modeLabel = (s: ProgramStep, isFirst: boolean): string => {
 
 export default function ProgramBuilderPage() {
   const { id } = useParams()
-  const { programs, activities, updateProgram } = useStore()
+  const { programs, activities, updateProgram, saveProgram } = useStore()
   const program = programs.find((p) => p.id === id)
   const [showAdd, setShowAdd] = useState(false)
   const [showSend, setShowSend] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const save = async () => {
+    if (!program) return
+    setSaving(true)
+    try {
+      await saveProgram(program)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   if (!program) return <EmptyState title="Програму не знайдено" />
   if (program.isPremade)
@@ -51,9 +65,14 @@ export default function ProgramBuilderPage() {
       <PageHeader
         title="Конструктор програми"
         actions={
-          <Button onClick={() => setShowSend(true)}>
-            <Send size={15} /> Надіслати
-          </Button>
+          <>
+            <Button variant="secondary" onClick={save} disabled={saving}>
+              <Save size={15} /> {saving ? 'Збереження…' : saved ? 'Збережено ✓' : 'Зберегти'}
+            </Button>
+            <Button onClick={() => setShowSend(true)}>
+              <Send size={15} /> Надіслати
+            </Button>
+          </>
         }
       />
 
