@@ -7,6 +7,7 @@ import {
   FolderOpen,
   CheckSquare,
   StickyNote,
+  BookOpen,
   HeartPulse,
 } from 'lucide-react'
 
@@ -18,6 +19,7 @@ const nav = [
   { to: '/resources', label: 'Ресурси', icon: FolderOpen },
   { to: '/tasks', label: 'Задачі', icon: CheckSquare },
   { to: '/notes', label: 'Нотатки', icon: StickyNote },
+  { to: '/journal', label: 'Щоденник', icon: BookOpen },
 ]
 
 export default function Layout() {

@@ -117,3 +117,21 @@ export interface ThreadComment {
   text: string
   createdAt: string
 }
+
+// Настрій клієнта в щоденниковому записі (5-бальна шкала).
+export type Mood = 'great' | 'good' | 'neutral' | 'low' | 'bad'
+
+// Запис у щоденнику, який клієнт залишає у своєму мобільному додатку.
+// Психолог переглядає їх у адмін-панелі (для нього вони лише для читання).
+export interface JournalEntry {
+  id: string
+  clientId: string
+  date: string
+  mood: Mood
+  title?: string
+  body: string
+  tags?: string[]
+  reviewed: boolean
+  reply?: string
+  createdAt: string
+}

@@ -4,6 +4,7 @@ import type {
   Client,
   Delivery,
   Group,
+  JournalEntry,
   Note,
   Program,
   ResourceItem,
@@ -213,6 +214,94 @@ const seedComments: ThreadComment[] = [
   { id: 'cm-3', deliveryId: 'd-1', elementId: null, author: 'practitioner', text: 'Гарна робота з заповненням анкети! Обговоримо результати на сесії в четвер.', createdAt: daysAgo(4) },
 ]
 
+const seedJournal: JournalEntry[] = [
+  {
+    id: 'j-1',
+    clientId: 'c-1',
+    date: daysAgo(0),
+    mood: 'good',
+    title: 'Спокійний ранок',
+    body: 'Сьогодні прокинулась без тривоги вперше за тиждень. Зробила дихальну вправу одразу після пробудження — допомогло. Вдень була зустріч, яку давно відкладала, і вона пройшла легше, ніж я очікувала.',
+    tags: ['тривога', 'дихання'],
+    reviewed: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: 'j-2',
+    clientId: 'c-2',
+    date: daysAgo(0),
+    mood: 'low',
+    title: 'Важкий дедлайн',
+    body: 'Знову затримався на роботі до ночі. Відчуваю, що не встигаю, і це тисне. Перед сном довго не міг заснути — прокручував робочі розмови.',
+    tags: ['робота', 'сон'],
+    reviewed: false,
+    createdAt: daysAgo(0),
+  },
+  {
+    id: 'j-3',
+    clientId: 'c-1',
+    date: daysAgo(1),
+    mood: 'neutral',
+    body: 'День був звичайний. Нічого особливого не сталося, але й тривоги майже не було. Записала три речі, за які вдячна.',
+    tags: ['вдячність'],
+    reviewed: true,
+    reply: 'Чудово, що ведете щоденник вдячності щодня. Помітила, що в дні з вправою тривоги менше — обговоримо це на сесії.',
+    createdAt: daysAgo(1),
+  },
+  {
+    id: 'j-4',
+    clientId: 'c-4',
+    date: daysAgo(1),
+    mood: 'great',
+    title: 'Гарний день',
+    body: 'Ходив на пробіжку вранці, потім провів час із сім\'єю. Відчуваю енергію і бажання продовжувати працювати над собою.',
+    tags: ['спорт', 'сім\'я'],
+    reviewed: false,
+    createdAt: daysAgo(1),
+  },
+  {
+    id: 'j-5',
+    clientId: 'c-2',
+    date: daysAgo(2),
+    mood: 'bad',
+    title: 'Зрив',
+    body: 'Посварився з керівником. Дуже розізлився, потім почувався виснаженим. Не зміг застосувати техніки, про які ми говорили — все сталося надто швидко.',
+    tags: ['робота', 'емоції'],
+    reviewed: true,
+    reply: 'Дякую, що поділилися навіть складним днем. Те, що ви це помітили й описали — вже важливий крок. Розберемо цю ситуацію разом.',
+    createdAt: daysAgo(2),
+  },
+  {
+    id: 'j-6',
+    clientId: 'c-1',
+    date: daysAgo(3),
+    mood: 'good',
+    body: 'Гарно поспілкувалася з подругою, відчула підтримку. Тривога була, але я з нею впоралась.',
+    reviewed: true,
+    createdAt: daysAgo(3),
+  },
+  {
+    id: 'j-7',
+    clientId: 'c-4',
+    date: daysAgo(4),
+    mood: 'neutral',
+    body: 'Трохи втомлений, але загалом стабільно. Зробив вправу на усвідомленість перед сном.',
+    tags: ['усвідомленість'],
+    reviewed: false,
+    createdAt: daysAgo(4),
+  },
+  {
+    id: 'j-8',
+    clientId: 'c-2',
+    date: daysAgo(5),
+    mood: 'low',
+    body: 'Знову проблеми зі сном. Прокидався кілька разів за ніч. Вранці важко було зібратися.',
+    tags: ['сон'],
+    reviewed: true,
+    createdAt: daysAgo(5),
+  },
+]
+
 interface Store {
   clients: Client[]
   groups: Group[]
@@ -223,6 +312,7 @@ interface Store {
   notes: Note[]
   deliveries: Delivery[]
   comments: ThreadComment[]
+  journal: JournalEntry[]
   addClient: (c: Omit<Client, 'id' | 'createdAt'>) => void
   updateClient: (id: string, patch: Partial<Client>) => void
   addGroup: (g: Omit<Group, 'id' | 'createdAt'>) => void
@@ -247,6 +337,8 @@ interface Store {
   sendToClients: (kind: 'activity' | 'program', refId: string, clientIds: string[]) => void
   addComment: (deliveryId: string, elementId: string | null, text: string) => void
   reopenDelivery: (id: string) => void
+  markJournalReviewed: (id: string, reviewed: boolean) => void
+  replyToJournal: (id: string, reply: string) => void
 }
 
 const StoreContext = createContext<Store | null>(null)
@@ -261,6 +353,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState(seedNotes)
   const [deliveries, setDeliveries] = useState(seedDeliveries)
   const [comments, setComments] = useState(seedComments)
+  const [journal, setJournal] = useState(seedJournal)
 
   const now = () => new Date().toISOString()
 
@@ -274,6 +367,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     notes,
     deliveries,
     comments,
+    journal,
     addClient: (c) => setClients((xs) => [...xs, { ...c, id: uid('c'), createdAt: now() }]),
     updateClient: (id, patch) => setClients((xs) => xs.map((x) => (x.id === id ? { ...x, ...patch } : x))),
     addGroup: (g) => setGroups((xs) => [...xs, { ...g, id: uid('g'), createdAt: now() }]),
@@ -342,6 +436,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setDeliveries((xs) =>
         xs.map((x) => (x.id === id ? { ...x, status: 'inProgress', completedAt: undefined } : x)),
       ),
+    markJournalReviewed: (id, reviewed) =>
+      setJournal((xs) => xs.map((x) => (x.id === id ? { ...x, reviewed } : x))),
+    replyToJournal: (id, reply) =>
+      setJournal((xs) => xs.map((x) => (x.id === id ? { ...x, reply, reviewed: true } : x))),
   }
 
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
@@ -355,5 +453,10 @@ export function useStore(): Store {
 
 export const formatDate = (iso?: string) =>
   iso ? new Date(iso).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
+
+export const formatDateTime = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleString('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : '—'
 
 export const clientName = (c?: Client) => (c ? `${c.firstName} ${c.lastName}` : '—')

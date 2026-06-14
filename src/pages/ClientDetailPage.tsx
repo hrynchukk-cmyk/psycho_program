@@ -4,6 +4,7 @@ import { ArrowLeft, Archive, ArchiveRestore, Eye, FileText, Link2, Plus, Upload 
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, Tabs, inputCls } from '../components/ui'
 import { statusBadge } from './ClientsPage'
+import { EntryCard } from './JournalPage'
 import type { DeliveryStatus } from '../types'
 
 const deliveryBadge = (s: DeliveryStatus) =>
@@ -18,7 +19,7 @@ const deliveryBadge = (s: DeliveryStatus) =>
 export default function ClientDetailPage() {
   const { id } = useParams()
   const store = useStore()
-  const { clients, groups, activities, programs, deliveries, resources, tasks, notes } = store
+  const { clients, groups, activities, programs, deliveries, resources, tasks, notes, journal } = store
   const client = clients.find((c) => c.id === id)
   const [tab, setTab] = useState('activities')
   const [showShare, setShowShare] = useState(false)
@@ -34,6 +35,9 @@ export default function ClientDetailPage() {
   const notShared = resources.filter((r) => !r.sharedWithClientIds.includes(client.id))
   const clientTasks = tasks.filter((t) => t.clientId === client.id)
   const clientNotes = notes.filter((n) => n.clientId === client.id)
+  const clientJournal = journal
+    .filter((j) => j.clientId === client.id)
+    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
   const memberOf = groups.filter((g) => g.memberIds.includes(client.id))
 
   const tabs = [
@@ -42,6 +46,7 @@ export default function ClientDetailPage() {
     { id: 'resources', label: 'Ресурси', count: sharedResources.length },
     { id: 'tasks', label: 'Задачі', count: clientTasks.length },
     { id: 'notes', label: 'Нотатки', count: clientNotes.length },
+    { id: 'journal', label: 'Щоденник', count: clientJournal.length },
   ]
 
   const addNote = () => {
@@ -227,6 +232,20 @@ export default function ClientDetailPage() {
           )}
         </div>
       )}
+
+      {tab === 'journal' &&
+        (clientJournal.length === 0 ? (
+          <EmptyState
+            title="Записів у щоденнику немає"
+            hint="Клієнт ще не залишав щоденних записів у мобільному додатку."
+          />
+        ) : (
+          <div className="space-y-3">
+            {clientJournal.map((e) => (
+              <EntryCard key={e.id} entry={e} />
+            ))}
+          </div>
+        ))}
 
       {showShare && (
         <Modal title="Поділитися ресурсом" onClose={() => setShowShare(false)}>
