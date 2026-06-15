@@ -275,7 +275,23 @@ model JournalEntry {
   reply     String?
   createdAt DateTime @default(now())
 
+  // Голосовий запис (аудіо в окремій таблиці, щоб не вантажити байти у списках).
+  audio            JournalAudio?
+  transcript       String?
+  // null | pending | done | failed
+  transcriptStatus String?
+
   @@index([clientId])
+}
+
+// Аудіо-файл голосового запису. Зберігаємо байти в БД (просто для демо без
+// зовнішнього сховища). Метадані читаються окремо від важких байтів.
+model JournalAudio {
+  entryId     String       @id
+  entry       JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  data        Bytes
+  mime        String
+  durationSec Int?
 }
 
 model Delivery {
