@@ -29,7 +29,8 @@ export const moods: { key: Mood; emoji: string; label: string; color: string }[]
   { key: 'bad', emoji: '😢', label: 'Дуже погано', color: '#dc2626' },
 ]
 
-export const moodMeta = (k: string) => moods.find((m) => m.key === k) ?? moods[2]
+// Нечутливо до регістру: /api/journal віддає настрій у ВЕРХНЬОМУ регістрі.
+export const moodMeta = (k: string) => moods.find((m) => m.key === String(k).toLowerCase()) ?? moods[2]
 
 export const formatDate = (iso?: string) =>
   iso ? new Date(iso).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' }) : ''
