@@ -25,6 +25,14 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "plugins": [
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Дозвольте доступ до мікрофона, щоб записувати голосові нотатки у щоденнику."
+        }
+      ]
+    ]
   }
 }

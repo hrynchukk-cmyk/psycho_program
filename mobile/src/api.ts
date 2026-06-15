@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 // Адреса бекенду. За замовчуванням — задеплоєний API; для локальної розробки
 // задайте EXPO_PUBLIC_API_URL у .env.
 const BASE = (process.env.EXPO_PUBLIC_API_URL ?? 'https://psycho-program-api.onrender.com').replace(/\/$/, '')
+export const API_BASE = BASE
 const TOKEN_KEY = 'pp_token'
 
 export const tokenStore = {

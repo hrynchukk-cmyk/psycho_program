@@ -1,9 +1,68 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BookOpen, CheckCircle2, Circle, MessageSquareReply, Send, Smartphone } from 'lucide-react'
+import { BookOpen, CheckCircle2, Circle, FileText, Loader2, Mic, MessageSquareReply, Send, Smartphone } from 'lucide-react'
 import { useStore, formatDateTime, clientName } from '../data/store'
+import { fetchObjectUrl } from '../api/client'
 import { Badge, Button, EmptyState, PageHeader, Toggle, inputCls } from '../components/ui'
 import type { JournalEntry, Mood } from '../types'
+
+// Програвач голосового запису: тягне аудіо з токеном і віддає <audio>.
+function AudioNote({ entryId, durationSec }: { entryId: string; durationSec?: number }) {
+  const [url, setUrl] = useState('')
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    let objUrl = ''
+    fetchObjectUrl(`/api/journal/${entryId}/audio`)
+      .then((u) => {
+        if (active) {
+          objUrl = u
+          setUrl(u)
+        } else URL.revokeObjectURL(u)
+      })
+      .catch(() => active && setError(true))
+    return () => {
+      active = false
+      if (objUrl) URL.revokeObjectURL(objUrl)
+    }
+  }, [entryId])
+
+  return (
+    <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
+      <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-500">
+        <Mic size={13} /> Голосовий запис{durationSec ? ` · ${durationSec} с` : ''}
+      </div>
+      {error ? (
+        <p className="text-xs text-red-600">Не вдалося завантажити аудіо</p>
+      ) : url ? (
+        <audio controls src={url} className="h-9 w-full" />
+      ) : (
+        <p className="text-xs text-gray-400">Завантаження…</p>
+      )}
+    </div>
+  )
+}
+
+function Transcript({ status, text }: { status?: string | null; text?: string }) {
+  if (!status && !text) return null
+  return (
+    <div className="mt-2 rounded-lg border border-gray-200 px-3 py-2.5">
+      <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-gray-500">
+        <FileText size={13} /> Транскрипція
+      </div>
+      {status === 'pending' ? (
+        <p className="flex items-center gap-1.5 text-xs text-gray-400">
+          <Loader2 size={12} className="animate-spin" /> Розшифровуємо аудіо…
+        </p>
+      ) : status === 'failed' && !text ? (
+        <p className="text-xs text-gray-400">Транскрипцію не виконано (не задано ключ або сталася помилка).</p>
+      ) : (
+        <p className="whitespace-pre-wrap text-sm text-gray-700">{text}</p>
+      )}
+    </div>
+  )
+}
 
 export const moodMeta: Record<Mood, { emoji: string; label: string; score: number; cls: string }> = {
   great: { emoji: '😄', label: 'Чудово', score: 5, cls: 'bg-emerald-100 text-emerald-700' },
@@ -59,7 +118,12 @@ export function EntryCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       {entry.title && <div className="mb-1 font-semibold text-gray-900">{entry.title}</div>}
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{entry.body}</p>
+      {entry.body && <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{entry.body}</p>}
+
+      {entry.audio && <AudioNote entryId={entry.id} durationSec={entry.audio.durationSec} />}
+      {(entry.transcript || entry.transcriptStatus) && (
+        <Transcript status={entry.transcriptStatus} text={entry.transcript} />
+      )}
 
       {entry.tags && entry.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">

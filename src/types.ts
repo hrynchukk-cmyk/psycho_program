@@ -134,4 +134,7 @@ export interface JournalEntry {
   reviewed: boolean
   reply?: string
   createdAt: string
+  audio?: { mime: string; durationSec?: number } | null
+  transcript?: string
+  transcriptStatus?: 'pending' | 'done' | 'failed' | null
 }

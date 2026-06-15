@@ -41,3 +41,15 @@ export async function api<T = unknown>(path: string, options: Options = {}): Pro
   }
   return data as T
 }
+
+export const apiBase = BASE
+
+// Завантажує бінарний ресурс (напр. аудіо) із токеном і повертає object URL.
+export async function fetchObjectUrl(path: string): Promise<string> {
+  const headers: Record<string, string> = {}
+  const token = tokenStore.get()
+  if (token) headers.Authorization = `Bearer ${token}`
+  const res = await fetch(`${BASE}${path}`, { headers })
+  if (!res.ok) throw new ApiError(res.status, `Помилка ${res.status}`)
+  return URL.createObjectURL(await res.blob())
+}

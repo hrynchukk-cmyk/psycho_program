@@ -147,6 +147,9 @@ export const adaptJournal = (j: any): JournalEntry => ({
   reviewed: j.reviewed,
   reply: j.reply ?? undefined,
   createdAt: j.createdAt,
+  audio: j.audio ?? null,
+  transcript: j.transcript ?? undefined,
+  transcriptStatus: j.transcriptStatus ?? null,
 })
 
 export const adaptComment = (c: any): ThreadComment => ({
