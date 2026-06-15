@@ -511,7 +511,12 @@ async function main() {
   })
   await prisma.delivery.createMany({
     data: [
+      // Демо-клієнт Олена — насичений набір для мобільного застосунку.
+      { kind: 'PROGRAM', refId: anxietyProgram.id, clientId: olena.id, sentAt: daysAgo(12), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: gratitude.id, clientId: olena.id, sentAt: daysAgo(3), status: 'IN_PROGRESS' },
+      { kind: 'ACTIVITY', refId: grounding.id, clientId: olena.id, sentAt: daysAgo(1), status: 'SENT' },
+      { kind: 'ACTIVITY', refId: bodyScan.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
+      // Інші клієнти.
       { kind: 'PROGRAM', refId: anxietyProgram.id, clientId: ihor.id, sentAt: daysAgo(10), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: grounding.id, clientId: ihor.id, sentAt: daysAgo(1), status: 'SENT' },
     ],
