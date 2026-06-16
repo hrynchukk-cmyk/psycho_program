@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Card } from '../ui'
 import { colors } from '../theme'
 
@@ -9,7 +9,7 @@ const modeLabel = (mode: string, days: number, first: boolean) => {
   return `Через ${days} дн. від старту`
 }
 
-export default function ProgramScreen({ route }: any) {
+export default function ProgramScreen({ route, navigation }: any) {
   const { delivery } = route.params
   const program = delivery.program
   const steps: any[] = program?.steps ?? []
@@ -39,17 +39,23 @@ export default function ProgramScreen({ route }: any) {
               </View>
               {i < steps.length - 1 && <View style={styles.line} />}
             </View>
-            <View style={{ flex: 1, paddingTop: 1, paddingBottom: i < steps.length - 1 ? 12 : 0 }}>
-              <Text style={styles.stepTitle}>{s.activityTitle}</Text>
-              {s.activityDescription ? <Text style={styles.stepDesc} numberOfLines={2}>{s.activityDescription}</Text> : null}
-              <Text style={styles.stepMeta}>{modeLabel(s.mode, s.days, i === 0)}</Text>
-            </View>
+            <Pressable
+              style={[styles.stepContent, { paddingBottom: i < steps.length - 1 ? 12 : 0 }]}
+              onPress={() => navigation.navigate('Activity', { activityId: s.activityId })}
+            >
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.stepTitle}>{s.activityTitle}</Text>
+                {s.activityDescription ? <Text style={styles.stepDesc} numberOfLines={2}>{s.activityDescription}</Text> : null}
+                <Text style={styles.stepMeta}>{modeLabel(s.mode, s.days, i === 0)}</Text>
+              </View>
+              <Text style={styles.stepChevron}>›</Text>
+            </Pressable>
           </View>
         ))}
       </Card>
 
       <Text style={styles.note}>
-        Активності надходитимуть за розкладом. Коли крок стане доступним, ви побачите його на головному екрані.
+        Натисніть на крок, щоб відкрити активність. Кроки можна виконувати у будь-якому порядку.
       </Text>
       <View style={{ height: 20 }} />
     </ScrollView>
@@ -64,6 +70,8 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 12, fontWeight: '600', color: colors.brand },
   section: { fontSize: 11, fontWeight: '700', color: colors.faint, textTransform: 'uppercase', marginBottom: 10, letterSpacing: 0.7 },
   stepRow: { flexDirection: 'row', gap: 10 },
+  stepContent: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 1 },
+  stepChevron: { fontSize: 20, color: '#d1d5db' },
   railCol: { width: 24, alignItems: 'center' },
   dot: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' },
   dotNum: { color: '#fff', fontWeight: '800', fontSize: 11 },

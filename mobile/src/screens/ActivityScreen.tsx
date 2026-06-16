@@ -24,7 +24,11 @@ export default function ActivityScreen({ route, navigation }: any) {
     setBusy(true)
     try {
       const responses = Object.entries(answers).map(([elementId, answer]) => ({ elementId, answer }))
-      await api(`/api/client/deliveries/${deliveryId}/complete`, { method: 'POST', body: { responses } })
+      // Зі звичайної доставки — за її id; з кроку програми (без deliveryId) — за activityId.
+      const path = deliveryId
+        ? `/api/client/deliveries/${deliveryId}/complete`
+        : `/api/client/activities/${activityId}/complete`
+      await api(path, { method: 'POST', body: { responses } })
       Alert.alert('Готово', 'Відповіді надіслано вашому психологу.', [{ text: 'OK', onPress: () => navigation.goBack() }])
     } catch {
       Alert.alert('Помилка', 'Не вдалося надіслати. Спробуйте ще раз.')

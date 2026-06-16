@@ -128,30 +128,27 @@ clientRouter.get(
   }),
 )
 
+// Чи має клієнт доступ до активності (надіслана напряму або в межах програми).
+async function clientHasActivityAccess(cid: string, activityId: string): Promise<boolean> {
+  const direct = await prisma.delivery.findFirst({ where: { clientId: cid, kind: 'ACTIVITY', refId: activityId } })
+  if (direct) return true
+  const programDeliveries = await prisma.delivery.findMany({
+    where: { clientId: cid, kind: 'PROGRAM' },
+    select: { refId: true },
+  })
+  const programIds = programDeliveries.map((d) => d.refId)
+  if (programIds.length === 0) return false
+  const inProgram = await prisma.programStep.findFirst({ where: { programId: { in: programIds }, activityId } })
+  return !!inProgram
+}
+
 // Деталі активності — лише якщо вона призначена клієнту (напряму або в межах програми).
 clientRouter.get(
   '/activities/:id',
   asyncHandler(async (req, res) => {
     const cid = myClientId(req)
     const activityId = req.params.id
-
-    const directly = await prisma.delivery.findFirst({
-      where: { clientId: cid, kind: 'ACTIVITY', refId: activityId },
-    })
-    let allowed = !!directly
-    if (!allowed) {
-      // Чи входить активність у якусь програму, надіслану клієнту?
-      const programDeliveries = await prisma.delivery.findMany({
-        where: { clientId: cid, kind: 'PROGRAM' },
-        select: { refId: true },
-      })
-      const programIds = programDeliveries.map((d) => d.refId)
-      const inProgram = await prisma.programStep.findFirst({
-        where: { programId: { in: programIds }, activityId },
-      })
-      allowed = !!inProgram
-    }
-    if (!allowed) throw new HttpError(404, 'Активність недоступна')
+    if (!(await clientHasActivityAccess(cid, activityId))) throw new HttpError(404, 'Активність недоступна')
 
     const activity = await prisma.activity.findUnique({
       where: { id: activityId },
@@ -180,6 +177,32 @@ clientRouter.post(
       data: { status: 'COMPLETED', completedAt: new Date(), responses: data.responses },
     })
     res.json({ id: updated.id, status: lc(updated.status) })
+  }),
+)
+
+// Завершити активність за її id. Працює і для кроку програми (де окремої
+// доставки ще немає) — створює доставку за потреби.
+clientRouter.post(
+  '/activities/:id/complete',
+  asyncHandler(async (req, res) => {
+    const cid = myClientId(req)
+    const activityId = req.params.id
+    if (!(await clientHasActivityAccess(cid, activityId))) throw new HttpError(404, 'Активність недоступна')
+
+    const data = completeSchema.parse(req.body)
+    const existing = await prisma.delivery.findFirst({
+      where: { clientId: cid, kind: 'ACTIVITY', refId: activityId },
+      orderBy: { sentAt: 'desc' },
+    })
+    const delivery = existing
+      ? await prisma.delivery.update({
+          where: { id: existing.id },
+          data: { status: 'COMPLETED', completedAt: new Date(), responses: data.responses },
+        })
+      : await prisma.delivery.create({
+          data: { clientId: cid, kind: 'ACTIVITY', refId: activityId, status: 'COMPLETED', completedAt: new Date(), responses: data.responses },
+        })
+    res.json({ id: delivery.id, status: lc(delivery.status) })
   }),
 )
 
