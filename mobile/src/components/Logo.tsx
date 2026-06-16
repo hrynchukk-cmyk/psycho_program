@@ -1,21 +1,16 @@
 import React from 'react'
 import { Text, View } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
-import Svg, { Circle, Path } from 'react-native-svg'
 import { colors } from '../theme'
 
-// Логотип: градієнтний квадрат із білою іконкою «людина + галочка» (за дизайном).
-export function Logo({ size = 54 }: { size?: number }) {
-  const icon = size * 0.56
+// Логотип без нативних модулів: фірмовий заокруглений квадрат із білою галочкою.
+export function Logo({ size = 64 }: { size?: number }) {
   return (
-    <LinearGradient
-      colors={[colors.brand, colors.brandDark]}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 0.9, y: 1 }}
+    <View
       style={{
         width: size,
         height: size,
         borderRadius: size * 0.28,
+        backgroundColor: colors.brand,
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: colors.brand,
@@ -25,12 +20,20 @@ export function Logo({ size = 54 }: { size?: number }) {
         elevation: 6,
       }}
     >
-      <Svg width={icon} height={icon} viewBox="0 0 44 44" fill="none">
-        <Circle cx="22" cy="17" r="9" stroke="#fff" strokeWidth="2.5" />
-        <Path d="M10 37C10 31 15.4 26.5 22 26.5C28.6 26.5 34 31 34 37" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" />
-        <Path d="M18 15.5L21 18.5L27 12" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-      </Svg>
-    </LinearGradient>
+      <View
+        style={{
+          width: size * 0.5,
+          height: size * 0.5,
+          borderRadius: size * 0.25,
+          borderWidth: 2.5,
+          borderColor: '#fff',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text style={{ color: '#fff', fontSize: size * 0.26, fontWeight: '800', marginTop: -1 }}>✓</Text>
+      </View>
+    </View>
   )
 }
 
