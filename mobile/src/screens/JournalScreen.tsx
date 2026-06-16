@@ -142,14 +142,18 @@ export default function JournalScreen() {
 
       {adding && (
         <Card style={{ marginTop: 14 }}>
-          <Text style={styles.formLabel}>Як ви почуваєтесь?</Text>
+          <Text style={styles.formLabel}>Як ви почуваєтесь? 💭</Text>
           <View style={styles.moodRow}>
             {moods.map((m) => {
               const sel = mood === m.key
               return (
-                <Pressable key={m.key} onPress={() => setMood(m.key)} style={[styles.moodBtn, sel && { borderColor: m.color, backgroundColor: '#fff' }]}>
+                <Pressable
+                  key={m.key}
+                  onPress={() => setMood(m.key)}
+                  style={[styles.moodBtn, sel ? { borderColor: m.color, backgroundColor: m.soft } : null]}
+                >
                   <Text style={styles.moodEmoji}>{m.emoji}</Text>
-                  <Text style={[styles.moodLabel, sel && { color: m.color, fontWeight: '700' }]}>{m.label}</Text>
+                  <Text style={[styles.moodLabel, sel && { color: m.color, fontWeight: '700' }]}>{m.short}</Text>
                 </Pressable>
               )
             })}
@@ -172,12 +176,20 @@ export default function JournalScreen() {
                 <Text style={styles.recordedRemove}>Видалити</Text>
               </Pressable>
             </View>
+          ) : recorder.isRecording ? (
+            <Pressable onPress={toggleRecord} style={styles.recBox}>
+              <View style={styles.recLeft}>
+                <View style={styles.recDot} />
+                <Text style={styles.recText}>REC {formatClock(recorder.durationMillis)}</Text>
+              </View>
+              <View style={styles.stopBtn}>
+                <Text style={styles.stopText}>■ Стоп</Text>
+              </View>
+            </Pressable>
           ) : (
-            <Pressable onPress={toggleRecord} style={[styles.recordBtn, recorder.isRecording && styles.recordBtnActive]}>
-              <View style={[styles.recordDot, recorder.isRecording && styles.recordDotActive]} />
-              <Text style={[styles.recordText, recorder.isRecording && { color: colors.danger }]}>
-                {recorder.isRecording ? `Запис… ${formatClock(recorder.durationMillis)} — натисніть, щоб зупинити` : 'Записати голосову нотатку'}
-              </Text>
+            <Pressable onPress={toggleRecord} style={styles.recordBtn}>
+              <View style={styles.micDot} />
+              <Text style={styles.recordText}>Записати голосову нотатку</Text>
             </Pressable>
           )}
 
@@ -202,7 +214,10 @@ export default function JournalScreen() {
         return (
           <Card key={e.id} style={{ marginBottom: 12 }}>
             <View style={styles.entryHead}>
-              <Text style={styles.entryMood}>{m.emoji} <Text style={{ color: m.color, fontWeight: '700' }}>{m.label}</Text></Text>
+              <View style={[styles.moodPill, { backgroundColor: m.soft }]}>
+                <Text style={styles.moodPillEmoji}>{m.emoji}</Text>
+                <Text style={[styles.moodPillLabel, { color: m.color }]}>{m.label}</Text>
+              </View>
               <Text style={styles.entryDate}>{formatDateTime(e.createdAt)}</Text>
             </View>
             {e.title ? <Text style={styles.entryTitle}>{e.title}</Text> : null}
@@ -227,30 +242,36 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   h1: { fontSize: 22, fontWeight: '800', color: colors.text },
   sub: { fontSize: 14, color: colors.sub, marginTop: 4 },
-  formLabel: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 10 },
-  moodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  moodBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingVertical: 8, paddingHorizontal: 10, alignItems: 'center', width: '30%' },
-  moodEmoji: { fontSize: 22 },
-  moodLabel: { fontSize: 11, color: colors.sub, marginTop: 2 },
-  input: { borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 11, fontSize: 15, color: colors.text },
+  formLabel: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 9 },
+  moodRow: { flexDirection: 'row', gap: 5, marginBottom: 12 },
+  moodBtn: { flex: 1, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.inputBg, borderRadius: 10, paddingVertical: 7, paddingHorizontal: 2, alignItems: 'center', gap: 2 },
+  moodEmoji: { fontSize: 18 },
+  moodLabel: { fontSize: 8, color: colors.faint, fontWeight: '600', textAlign: 'center' },
+  input: { backgroundColor: colors.inputBg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 9, paddingHorizontal: 11, paddingVertical: 10, fontSize: 15, color: colors.text },
   formActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  entryHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  entryMood: { fontSize: 14 },
+  entryHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  moodPill: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 100, paddingHorizontal: 8, paddingVertical: 3 },
+  moodPillEmoji: { fontSize: 12 },
+  moodPillLabel: { fontSize: 11, fontWeight: '700' },
   entryDate: { fontSize: 12, color: colors.faint },
-  entryTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 3 },
-  entryBody: { fontSize: 14, color: colors.text, lineHeight: 20 },
-  reply: { marginTop: 12, backgroundColor: colors.brandSoft, borderRadius: 10, padding: 12, borderLeftWidth: 3, borderLeftColor: colors.brand },
-  replyLabel: { fontSize: 12, fontWeight: '700', color: colors.brandDark, marginBottom: 3 },
-  replyText: { fontSize: 14, color: colors.text, lineHeight: 19 },
+  entryTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginBottom: 3 },
+  entryBody: { fontSize: 14, color: colors.text2, lineHeight: 20 },
+  reply: { marginTop: 10, backgroundColor: colors.brandSoft, borderRadius: 9, padding: 11, borderLeftWidth: 3, borderLeftColor: colors.brand },
+  replyLabel: { fontSize: 9, fontWeight: '700', color: colors.brand, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.5 },
+  replyText: { fontSize: 13, color: colors.text2, lineHeight: 18 },
   // Запис у формі
-  recordBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, marginTop: 10 },
-  recordBtnActive: { borderColor: colors.danger, backgroundColor: '#fef2f2' },
-  recordDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.danger },
-  recordDotActive: { opacity: 0.9 },
-  recordText: { fontSize: 14, color: colors.text, flex: 1 },
-  recordedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.brandSoft, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, marginTop: 10 },
-  recordedText: { fontSize: 14, color: colors.brandDark, fontWeight: '600' },
-  recordedRemove: { fontSize: 13, color: colors.danger, fontWeight: '600' },
+  recordBtn: { flexDirection: 'row', alignItems: 'center', gap: 9, borderWidth: 1.5, borderColor: colors.border, borderRadius: 9, paddingVertical: 11, paddingHorizontal: 12, marginTop: 10 },
+  micDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.danger },
+  recordText: { fontSize: 13, color: colors.text2, flex: 1 },
+  recBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fef2f2', borderWidth: 1.5, borderColor: '#fca5a5', borderRadius: 9, paddingVertical: 9, paddingHorizontal: 11, marginTop: 10 },
+  recLeft: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  recDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger },
+  recText: { fontSize: 12, fontWeight: '700', color: colors.danger },
+  stopBtn: { backgroundColor: colors.danger, borderRadius: 6, paddingHorizontal: 9, paddingVertical: 4 },
+  stopText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  recordedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.brandSoft, borderRadius: 9, paddingVertical: 11, paddingHorizontal: 12, marginTop: 10 },
+  recordedText: { fontSize: 13, color: colors.brandDark, fontWeight: '600' },
+  recordedRemove: { fontSize: 12, color: colors.danger, fontWeight: '700' },
   // Голосова нотатка у записі
   voiceNote: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.bg, borderRadius: 10, padding: 10, marginTop: 10 },
   playBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: colors.brand, alignItems: 'center', justifyContent: 'center' },

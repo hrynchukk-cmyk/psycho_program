@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput
 import { useAuth } from '../auth'
 import { ApiError } from '../api'
 import { Button } from '../ui'
+import { Logo } from '../components/Logo'
 import { colors } from '../theme'
 
 export default function AuthScreen() {
@@ -30,7 +31,7 @@ export default function AuthScreen() {
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.logo}>
-          <Text style={styles.logoMark}>💙</Text>
+          <Logo size={64} />
         </View>
         <Text style={styles.title}>Psycho Program</Text>
         <Text style={styles.subtitle}>Застосунок для клієнтів</Text>
@@ -89,8 +90,7 @@ export default function AuthScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 24, paddingTop: 80, flexGrow: 1 },
-  logo: { alignSelf: 'center', width: 64, height: 64, borderRadius: 18, backgroundColor: colors.brandSoft, alignItems: 'center', justifyContent: 'center' },
-  logoMark: { fontSize: 30 },
+  logo: { alignSelf: 'center' },
   title: { textAlign: 'center', fontSize: 22, fontWeight: '800', color: colors.text, marginTop: 14 },
   subtitle: { textAlign: 'center', fontSize: 14, color: colors.sub, marginTop: 2, marginBottom: 24 },
   tabs: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 4, marginBottom: 16 },

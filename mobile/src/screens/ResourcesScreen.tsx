@@ -41,14 +41,15 @@ export default function ResourcesScreen() {
 
       {items.map((r) => (
         <Pressable key={r.id} onPress={() => r.url && Linking.openURL(r.url)}>
-          <Card style={{ marginBottom: 10, flexDirection: 'row', alignItems: 'center' }}>
-            <View style={styles.iconBox}>
+          <Card style={{ marginBottom: 8, flexDirection: 'row', alignItems: 'center', padding: 11 }}>
+            <View style={[styles.iconBox, { backgroundColor: r.kind === 'link' ? colors.linkTile : colors.fileTile }]}>
               <Text style={styles.icon}>{r.kind === 'link' ? '🔗' : '📄'}</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{r.name}</Text>
-              <Text style={styles.meta}>{r.kind === 'link' ? r.url : `${r.fileType ?? 'Файл'}${r.size ? ' · ' + r.size : ''}`}</Text>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.name} numberOfLines={1}>{r.name}</Text>
+              <Text style={styles.meta} numberOfLines={1}>{r.kind === 'link' ? r.url : `${r.fileType ?? 'Файл'}${r.size ? ' · ' + r.size : ''}`}</Text>
             </View>
+            <Text style={styles.chevron}>›</Text>
           </Card>
         </Pressable>
       ))}
@@ -60,8 +61,9 @@ export default function ResourcesScreen() {
 const styles = StyleSheet.create({
   h1: { fontSize: 22, fontWeight: '800', color: colors.text },
   sub: { fontSize: 14, color: colors.sub, marginTop: 4 },
-  iconBox: { width: 42, height: 42, borderRadius: 11, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  icon: { fontSize: 20 },
-  name: { fontSize: 15, fontWeight: '600', color: colors.text },
+  iconBox: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 11 },
+  icon: { fontSize: 18 },
+  name: { fontSize: 14, fontWeight: '600', color: colors.text },
   meta: { fontSize: 12, color: colors.faint, marginTop: 2 },
+  chevron: { fontSize: 20, color: '#d1d5db', marginLeft: 8 },
 })

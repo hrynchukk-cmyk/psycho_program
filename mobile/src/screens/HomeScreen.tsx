@@ -4,12 +4,31 @@ import { useFocusEffect } from '@react-navigation/native'
 import { api } from '../api'
 import { useAuth } from '../auth'
 import { Card, Empty, Loading, Pill } from '../ui'
+import { Avatar } from '../components/Logo'
 import { colors } from '../theme'
 
 const statusPill = (s: string) => {
   if (s === 'completed') return <Pill text="Завершено" bg={colors.greenSoft} color={colors.green} />
-  if (s === 'inProgress') return <Pill text="В процесі" bg={colors.blueSoft} color={colors.blueText} />
+  if (s === 'inProgress') return <Pill text="В процесі" bg={colors.brandSoft} color={colors.brand} />
   return <Pill text="Нове" bg={colors.amberSoft} color={colors.amber} />
+}
+
+function ItemCard({ icon, tint, status, title, desc, meta, onPress }: any) {
+  return (
+    <Pressable onPress={onPress}>
+      <Card style={styles.card}>
+        <View style={[styles.iconTile, { backgroundColor: tint }]}>
+          <Text style={styles.icon}>{icon}</Text>
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <View style={styles.pillRow}>{statusPill(status)}</View>
+          <Text style={styles.cardTitle} numberOfLines={1}>{title}</Text>
+          {desc ? <Text style={styles.cardDesc} numberOfLines={1}>{desc}</Text> : null}
+          {meta ? <Text style={styles.meta}>{meta}</Text> : null}
+        </View>
+      </Card>
+    </Pressable>
+  )
 }
 
 export default function HomeScreen({ navigation }: any) {
@@ -25,11 +44,7 @@ export default function HomeScreen({ navigation }: any) {
     }
   }, [])
 
-  useFocusEffect(
-    useCallback(() => {
-      load()
-    }, [load]),
-  )
+  useFocusEffect(useCallback(() => { load() }, [load]))
 
   const onRefresh = async () => {
     setRefreshing(true)
@@ -41,6 +56,7 @@ export default function HomeScreen({ navigation }: any) {
 
   const programs = items.filter((i) => i.kind === 'program')
   const activities = items.filter((i) => i.kind === 'activity')
+  const initials = user ? `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}` : '·'
 
   return (
     <ScrollView
@@ -48,43 +64,40 @@ export default function HomeScreen({ navigation }: any) {
       contentContainerStyle={{ padding: 16 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      <Text style={styles.hello}>Вітаємо, {user?.firstName}! 👋</Text>
-      <Text style={styles.sub}>Ваш простір з вправами та програмами{user?.practitioner ? ` від ${user.practitioner}` : ''}.</Text>
+      <Card style={styles.header}>
+        <Avatar initials={initials} size={40} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.hello}>Вітаємо, {user?.firstName}! 👋</Text>
+          {user?.practitioner ? <Text style={styles.headerSub}>Психолог: {user.practitioner}</Text> : null}
+        </View>
+      </Card>
 
       {programs.length > 0 && <Text style={styles.section}>Програми</Text>}
       {programs.map((d) => (
-        <Pressable key={d.id} onPress={() => navigation.navigate('Program', { delivery: d })}>
-          <Card style={styles.card}>
-            <View style={styles.rowBetween}>
-              <View style={styles.iconBox}>
-                <Text style={styles.icon}>🗺️</Text>
-              </View>
-              {statusPill(d.status)}
-            </View>
-            <Text style={styles.cardTitle}>{d.program?.title ?? 'Програма'}</Text>
-            <Text style={styles.cardDesc} numberOfLines={2}>{d.program?.description}</Text>
-            <Text style={styles.meta}>{d.program?.steps?.length ?? 0} кроків · натисніть, щоб відкрити</Text>
-          </Card>
-        </Pressable>
+        <ItemCard
+          key={d.id}
+          icon="🧘"
+          tint={colors.brandSoft}
+          status={d.status}
+          title={d.program?.title ?? 'Програма'}
+          desc={d.program?.description}
+          meta={`📋 ${d.program?.steps?.length ?? 0} кроків`}
+          onPress={() => navigation.navigate('Program', { delivery: d })}
+        />
       ))}
 
       {activities.length > 0 && <Text style={styles.section}>Активності</Text>}
       {activities.map((d) => (
-        <Pressable key={d.id} onPress={() => navigation.navigate('Activity', { deliveryId: d.id, activityId: d.activity?.id, status: d.status })}>
-          <Card style={styles.card}>
-            <View style={styles.rowBetween}>
-              <View style={styles.iconBox}>
-                <Text style={styles.icon}>📝</Text>
-              </View>
-              {statusPill(d.status)}
-            </View>
-            <Text style={styles.cardTitle}>{d.activity?.title ?? 'Активність'}</Text>
-            <Text style={styles.cardDesc} numberOfLines={2}>{d.activity?.description}</Text>
-            <Text style={styles.meta}>
-              {(d.activity?.elements?.filter((e: any) => e.type !== 'pageBreak').length ?? 0)} елементів
-            </Text>
-          </Card>
-        </Pressable>
+        <ItemCard
+          key={d.id}
+          icon="📝"
+          tint="#eff6ff"
+          status={d.status}
+          title={d.activity?.title ?? 'Активність'}
+          desc={d.activity?.description}
+          meta={`${d.activity?.elements?.filter((e: any) => e.type !== 'pageBreak').length ?? 0} елементів`}
+          onPress={() => navigation.navigate('Activity', { deliveryId: d.id, activityId: d.activity?.id, status: d.status })}
+        />
       ))}
 
       {items.length === 0 && (
@@ -96,14 +109,15 @@ export default function HomeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  hello: { fontSize: 22, fontWeight: '800', color: colors.text },
-  sub: { fontSize: 14, color: colors.sub, marginTop: 4, marginBottom: 8 },
-  section: { fontSize: 13, fontWeight: '700', color: colors.faint, textTransform: 'uppercase', marginTop: 18, marginBottom: 8, letterSpacing: 0.5 },
-  card: { marginBottom: 12 },
-  rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  iconBox: { width: 40, height: 40, borderRadius: 11, backgroundColor: colors.brandSoft, alignItems: 'center', justifyContent: 'center' },
-  icon: { fontSize: 20 },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
-  cardDesc: { fontSize: 14, color: colors.sub, marginTop: 3, lineHeight: 19 },
-  meta: { fontSize: 12, color: colors.faint, marginTop: 10 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6, paddingVertical: 14 },
+  hello: { fontSize: 17, fontWeight: '800', color: colors.text },
+  headerSub: { fontSize: 12, color: colors.sub, marginTop: 2 },
+  section: { fontSize: 11, fontWeight: '700', color: colors.faint, textTransform: 'uppercase', marginTop: 16, marginBottom: 8, letterSpacing: 0.7 },
+  card: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 10, padding: 12 },
+  iconTile: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  icon: { fontSize: 19 },
+  pillRow: { flexDirection: 'row', marginBottom: 5 },
+  cardTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+  cardDesc: { fontSize: 12, color: colors.sub, marginTop: 2 },
+  meta: { fontSize: 11, color: colors.faint, marginTop: 5 },
 })
