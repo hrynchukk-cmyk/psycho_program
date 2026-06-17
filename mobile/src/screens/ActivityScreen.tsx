@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { api } from '../api'
 import { Button, Card, Loading } from '../ui'
 import BreathingExercise from '../components/BreathingExercise'
+import CardDeck from '../components/CardDeck'
 import { colors } from '../theme'
 
 // Активність відображається за елементами; інформаційні елементи не потребують відповіді.
@@ -12,6 +13,7 @@ export default function ActivityScreen({ route, navigation }: any) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
   const [breathing, setBreathing] = useState<{ pattern: number[]; title: string } | null>(null)
+  const [deck, setDeck] = useState<{ cards: string[]; title: string } | null>(null)
   const done = status === 'completed'
 
   useEffect(() => {
@@ -77,6 +79,18 @@ export default function ActivityScreen({ route, navigation }: any) {
                 <Text style={styles.breathBtnText}>Почати вправу</Text>
               </View>
             </Pressable>
+          ) : el.type === 'cards' ? (
+            <Pressable
+              style={styles.deck}
+              onPress={() => setDeck({ cards: (el.options ?? []).filter((c: string) => c.trim()), title: el.title || 'Колода карток' })}
+            >
+              <Text style={styles.deckIcon}>🃏</Text>
+              <Text style={styles.breathTitle}>{el.title || 'Колода карток'}</Text>
+              <Text style={styles.breathHint}>{(el.options ?? []).filter((c: string) => c.trim()).length} карток · гортайте й розмірковуйте</Text>
+              <View style={styles.breathBtn}>
+                <Text style={styles.breathBtnText}>Відкрити колоду</Text>
+              </View>
+            </Pressable>
           ) : (
             <View style={styles.field}>
               <Text style={styles.label}>{el.title}</Text>
@@ -134,6 +148,7 @@ export default function ActivityScreen({ route, navigation }: any) {
         title={breathing?.title}
         onClose={() => setBreathing(null)}
       />
+      <CardDeck visible={!!deck} cards={deck?.cards ?? []} title={deck?.title} onClose={() => setDeck(null)} />
     </ScrollView>
   )
 }
@@ -154,6 +169,8 @@ const styles = StyleSheet.create({
   breathHint: { fontSize: 12, color: colors.sub, marginTop: 4, textAlign: 'center' },
   breathBtn: { backgroundColor: colors.brand, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 32, marginTop: 14 },
   breathBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  deck: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 14, padding: 18, alignItems: 'center' },
+  deckIcon: { fontSize: 34 },
   field: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14 },
   label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 10, lineHeight: 20 },
   input: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: colors.text },

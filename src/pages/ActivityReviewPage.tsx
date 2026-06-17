@@ -113,6 +113,9 @@ export default function ActivityReviewPage() {
                 {el.type === 'breathing' && (
                   <p className="mt-1 text-xs text-gray-400">🫁 Дихальна вправа — виконується клієнтом у застосунку</p>
                 )}
+                {el.type === 'cards' && (
+                  <p className="mt-1 text-xs text-gray-400">🃏 Колода карток ({el.options?.length ?? 0}) — клієнт гортає у застосунку</p>
+                )}
                 {isQuestion && (
                   <div className="mt-2 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-800">
                     {answer ?? <span className="text-gray-400">Без відповіді</span>}

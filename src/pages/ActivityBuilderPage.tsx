@@ -8,6 +8,7 @@ import {
   CircleDot,
   Heading,
   Image,
+  Layers,
   MessageSquare,
   Plus,
   Save,
@@ -35,6 +36,7 @@ const elementMeta: Record<ElementType, { label: string; icon: typeof Type; hint?
   video: { label: 'Відео', icon: Video },
   image: { label: 'Зображення', icon: Image },
   breathing: { label: 'Дихальна вправа', icon: Wind, hint: 'Анімація дихання з голосом (4-7-8) у застосунку' },
+  cards: { label: 'Колода карток', icon: Layers, hint: 'Свайпова колода рефлексивних промптів у застосунку' },
   pageBreak: { label: 'Розрив сторінки', icon: SplitSquareVertical, hint: 'Наступний елемент почне нову сторінку' },
 }
 
@@ -107,10 +109,13 @@ export default function ActivityBuilderPage() {
               ? 'Текст для клієнта…'
               : type === 'breathing'
                 ? 'Дихальна вправа 4-7-8'
-                : 'Нове запитання',
+                : type === 'cards'
+                  ? 'Колода рефлексій'
+                  : 'Нове запитання',
       ...(type === 'multipleChoice' ? { options: ['Варіант 1', 'Варіант 2'] } : {}),
       // Патерн дихання: вдих 4 с · затримка 7 с · видих 8 с.
       ...(type === 'breathing' ? { options: ['4', '7', '8'] } : {}),
+      ...(type === 'cards' ? { options: ['Що сьогодні дало вам відчуття опори?', 'За що ви вдячні саме зараз?', 'Що ви хотіли б відпустити?'] } : {}),
     }
     setElements([...activity.elements, el])
     setShowAdd(false)
@@ -233,6 +238,36 @@ export default function ActivityBuilderPage() {
                         className="text-sm text-brand-600 hover:text-brand-700"
                       >
                         + Додати варіант
+                      </button>
+                    </div>
+                  )}
+                  {el.type === 'cards' && (
+                    <div className="mt-2 space-y-1.5">
+                      <div className="text-xs font-medium text-gray-500">Картки колоди ({el.options?.length ?? 0})</div>
+                      {el.options?.map((opt, oi) => (
+                        <div key={oi} className="flex items-start gap-2">
+                          <span className="mt-2 text-xs font-semibold text-brand-600">{oi + 1}</span>
+                          <textarea
+                            rows={2}
+                            className={`${inputCls} py-1.5`}
+                            value={opt}
+                            onChange={(e) =>
+                              updateEl(i, { options: el.options!.map((o, j) => (j === oi ? e.target.value : o)) })
+                            }
+                          />
+                          <button
+                            onClick={() => updateEl(i, { options: el.options!.filter((_, j) => j !== oi) })}
+                            className="mt-1.5 rounded p-1 text-gray-400 hover:text-red-600"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => updateEl(i, { options: [...(el.options ?? []), ''] })}
+                        className="text-sm text-brand-600 hover:text-brand-700"
+                      >
+                        + Додати картку
                       </button>
                     </div>
                   )}

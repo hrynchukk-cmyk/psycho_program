@@ -21,6 +21,7 @@ type ElType =
   | 'IMAGE'
   | 'PAGE_BREAK'
   | 'BREATHING'
+  | 'CARDS'
 
 // Компактний опис елементів активності.
 const els = (list: { type: ElType; title?: string; options?: string[] }[]) => ({
@@ -207,6 +208,30 @@ async function main() {
       { type: 'BREATHING', title: 'Квадратне дихання 4-4-4-4', options: ['4', '4', '4', '4'] },
       { type: 'SCALE', title: 'Відчуття спокою ПІСЛЯ (1–10)' },
     ],
+  )
+
+  const selfCards = await premade(
+    'Картки самопізнання',
+    'Колода рефлексивних карток: гортайте по одній і не поспішаючи відповідайте собі. Без правильних відповідей.',
+    'Самопізнання',
+    [
+      { type: 'TEXT', title: 'Знайдіть кілька спокійних хвилин. Гортайте картки й відповідайте подумки або запишіть думки нижче.' },
+      {
+        type: 'CARDS',
+        title: 'Колода самопізнання',
+        options: [
+          'За що ви вдячні саме сьогодні?',
+          'Що дало вам відчуття опори цього тижня?',
+          'Яка емоція була з вами найчастіше? Звідки вона?',
+          'Що ви хотіли б відпустити?',
+          'Коли ви востаннє пишалися собою — і за що?',
+          'Що зараз найбільше потребує вашої турботи?',
+          'Який маленький крок наблизить вас до того, що важливо?',
+        ],
+      },
+      { type: 'LONG_ANSWER', title: 'Яка картка зачепила найбільше і чому?' },
+    ],
+    { updated: 3 },
   )
 
   const breathing478 = await premade(
@@ -529,6 +554,7 @@ async function main() {
       // Демо-клієнт Олена — насичений набір для мобільного застосунку.
       { kind: 'PROGRAM', refId: anxietyProgram.id, clientId: olena.id, sentAt: daysAgo(12), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: breathing478.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
+      { kind: 'ACTIVITY', refId: selfCards.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
       { kind: 'ACTIVITY', refId: gratitude.id, clientId: olena.id, sentAt: daysAgo(3), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: grounding.id, clientId: olena.id, sentAt: daysAgo(1), status: 'SENT' },
       { kind: 'ACTIVITY', refId: bodyScan.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },

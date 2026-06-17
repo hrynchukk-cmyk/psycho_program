@@ -28,6 +28,7 @@ const EL: Record<string, string> = {
   IMAGE: 'image',
   PAGE_BREAK: 'pageBreak',
   BREATHING: 'breathing',
+  CARDS: 'cards',
 }
 const MODE: Record<string, string> = {
   IMMEDIATELY: 'immediately',

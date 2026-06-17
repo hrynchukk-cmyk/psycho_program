@@ -31,6 +31,7 @@ export type ElementType =
   | 'image'
   | 'pageBreak'
   | 'breathing'
+  | 'cards'
 
 export interface ActivityElement {
   id: string
