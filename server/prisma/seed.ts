@@ -528,6 +528,7 @@ async function main() {
     data: [
       // Демо-клієнт Олена — насичений набір для мобільного застосунку.
       { kind: 'PROGRAM', refId: anxietyProgram.id, clientId: olena.id, sentAt: daysAgo(12), status: 'IN_PROGRESS' },
+      { kind: 'ACTIVITY', refId: breathing478.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
       { kind: 'ACTIVITY', refId: gratitude.id, clientId: olena.id, sentAt: daysAgo(3), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: grounding.id, clientId: olena.id, sentAt: daysAgo(1), status: 'SENT' },
       { kind: 'ACTIVITY', refId: bodyScan.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
