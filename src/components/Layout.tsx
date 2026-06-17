@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import {
+  LayoutDashboard,
   Users,
   UsersRound,
   ClipboardList,
@@ -14,6 +15,7 @@ import {
 import { useStore } from '../data/store'
 
 const nav = [
+  { to: '/dashboard', label: 'Статистика', icon: LayoutDashboard },
   { to: '/clients', label: 'Клієнти', icon: Users },
   { to: '/groups', label: 'Групи', icon: UsersRound },
   { to: '/activities', label: 'Активності', icon: ClipboardList },

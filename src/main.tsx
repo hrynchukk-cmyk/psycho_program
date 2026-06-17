@@ -5,6 +5,7 @@ import './index.css'
 import { StoreProvider, useStore } from './data/store'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
 import ClientsPage from './pages/ClientsPage'
 import ClientDetailPage from './pages/ClientDetailPage'
 import GroupsPage from './pages/GroupsPage'
@@ -23,7 +24,8 @@ const router = createHashRouter([
   {
     element: <Layout />,
     children: [
-      { path: '/', element: <Navigate to="/clients" replace /> },
+      { path: '/', element: <Navigate to="/dashboard" replace /> },
+      { path: '/dashboard', element: <DashboardPage /> },
       { path: '/clients', element: <ClientsPage /> },
       { path: '/clients/:id', element: <ClientDetailPage /> },
       { path: '/groups', element: <GroupsPage /> },

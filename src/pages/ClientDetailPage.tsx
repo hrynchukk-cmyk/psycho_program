@@ -4,7 +4,9 @@ import { ArrowLeft, Archive, ArchiveRestore, Eye, FileText, Link2, Plus, Upload 
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, Tabs, inputCls } from '../components/ui'
 import { statusBadge } from './ClientsPage'
-import { EntryCard } from './JournalPage'
+import { EntryCard, moodMeta } from './JournalPage'
+import { BarList, MoodLineChart, StatCard } from '../components/charts'
+import { avgMood, clientEngagement, moodDistribution, moodSeries, prePostInsights, topTags } from '../lib/stats'
 import type { DeliveryStatus } from '../types'
 
 const deliveryBadge = (s: DeliveryStatus) =>
@@ -21,7 +23,7 @@ export default function ClientDetailPage() {
   const store = useStore()
   const { clients, groups, activities, programs, deliveries, resources, tasks, notes, journal } = store
   const client = clients.find((c) => c.id === id)
-  const [tab, setTab] = useState('activities')
+  const [tab, setTab] = useState('stats')
   const [showShare, setShowShare] = useState(false)
   const [showNote, setShowNote] = useState(false)
   const [noteForm, setNoteForm] = useState({ title: '', body: '' })
@@ -41,6 +43,7 @@ export default function ClientDetailPage() {
   const memberOf = groups.filter((g) => g.memberIds.includes(client.id))
 
   const tabs = [
+    { id: 'stats', label: 'Статистика' },
     { id: 'activities', label: 'Активності', count: actDeliveries.length },
     { id: 'programs', label: 'Програми', count: progDeliveries.length },
     { id: 'resources', label: 'Ресурси', count: sharedResources.length },
@@ -92,6 +95,80 @@ export default function ClientDetailPage() {
       )}
 
       <Tabs tabs={tabs} active={tab} onChange={setTab} />
+
+      {tab === 'stats' &&
+        (() => {
+          const eng = clientEngagement(client.id, journal, deliveries)
+          const series = moodSeries(journal, client.id)
+          const avg = avgMood(clientJournal)
+          const dist = moodDistribution(clientJournal)
+          const maxDist = Math.max(1, ...dist.map((d) => d.count))
+          const prepost = prePostInsights(client.id, deliveries, activities)
+          const tags = topTags(clientJournal)
+          return (
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <StatCard label="Середній настрій" value={avg ? `${Object.values(moodMeta).find((m) => m.score === Math.round(avg))?.emoji ?? ''} ${avg}` : '—'} hint="за весь час" />
+                <StatCard label="Записів у щоденнику" value={eng.entries} hint={`${eng.perWeek}/тиждень`} />
+                <StatCard label="Остання активність" value={eng.lastActive ? (eng.lastActiveDays === 0 ? 'сьогодні' : `${eng.lastActiveDays} дн тому`) : '—'} accent={eng.lastActiveDays >= 7} />
+                <StatCard label="Завершення активностей" value={eng.totalActivities ? `${eng.completionPct}%` : '—'} hint={`${eng.completed} з ${eng.totalActivities}`} />
+              </div>
+
+              <div className="rounded-xl border border-gray-200 bg-white p-5">
+                <h3 className="mb-1 font-semibold text-gray-900">Динаміка настрою</h3>
+                <p className="mb-3 text-xs text-gray-500">Записи щоденника в часі (😢 1 … 😄 5)</p>
+                {series.length > 1 ? (
+                  <MoodLineChart points={series} />
+                ) : (
+                  <p className="text-sm text-gray-400">Замало записів для графіка — потрібно щонайменше два.</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-gray-200 bg-white p-5">
+                  <h3 className="mb-3 font-semibold text-gray-900">Розподіл настрою</h3>
+                  {clientJournal.length === 0 ? (
+                    <p className="text-sm text-gray-400">Немає записів.</p>
+                  ) : (
+                    <BarList items={dist.map((d) => ({ label: `${moodMeta[d.mood].emoji} ${moodMeta[d.mood].label}`, value: d.count, max: maxDist }))} />
+                  )}
+                </div>
+
+                <div className="rounded-xl border border-gray-200 bg-white p-5">
+                  <h3 className="mb-1 font-semibold text-gray-900">Зміна «до / після»</h3>
+                  <p className="mb-3 text-xs text-gray-500">Середня зміна шкал у вправах</p>
+                  {prepost.length === 0 ? (
+                    <p className="text-sm text-gray-400">Поки немає завершених вправ зі шкалами «до» і «після».</p>
+                  ) : (
+                    <div className="space-y-2.5">
+                      {prepost.map((p) => (
+                        <div key={p.activityId} className="flex items-center justify-between text-sm">
+                          <span className="text-gray-700">{p.activityTitle}</span>
+                          <span className="flex items-center gap-1.5">
+                            <span className="text-gray-500">{p.avgBefore} → {p.avgAfter}</span>
+                            <Badge tone={p.avgDelta < 0 ? 'green' : p.avgDelta > 0 ? 'amber' : 'gray'}>
+                              {p.avgDelta > 0 ? '+' : ''}{p.avgDelta}
+                            </Badge>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {tags.length > 0 && (
+                    <div className="mt-4 border-t border-gray-100 pt-3">
+                      <div className="mb-2 text-xs font-medium text-gray-500">Часті теми</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tags.map(([t, n]) => (
+                          <Badge key={t} tone="gray">#{t} · {n}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
       {tab === 'activities' &&
         (actDeliveries.length === 0 ? (
