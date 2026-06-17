@@ -1,22 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio'
 import * as Speech from 'expo-speech'
 import { colors } from '../theme'
 
 const MIN_SCALE = 0.5
 
-type Phase = { label: string; say: string; sec: number; to: number }
+// Аудіо: голосові підказки (ElevenLabs) + фонова музика. Програються нативно.
+const SOUNDS = {
+  inhale: require('../../assets/audio/inhale.mp3'),
+  hold: require('../../assets/audio/hold.mp3'),
+  exhale: require('../../assets/audio/exhale.mp3'),
+  done: require('../../assets/audio/done.mp3'),
+  ambient: require('../../assets/audio/ambient.mp3'),
+}
+// Текст для фолбеку на системний TTS, якщо аудіо не вдалось завантажити.
+const FALLBACK: Record<string, string> = { inhale: 'Вдихніть', hold: 'Затримайте', exhale: 'Видихніть', done: 'Вправу завершено. Чудова робота' }
 
-// Будує фази з патерну: [вдих, затримка, видих] або [вдих, затримка, видих, пауза].
+type SoundKey = 'inhale' | 'hold' | 'exhale'
+type Phase = { label: string; sound: SoundKey; sec: number; to: number }
+
 function buildPhases(pattern: number[]): Phase[] {
   const inhale = pattern[0] ?? 4
   const hold = pattern[1] ?? 0
   const exhale = pattern[2] ?? 4
   const rest = pattern[3] ?? 0
-  const phases: Phase[] = [{ label: 'Вдих', say: 'Вдихніть', sec: inhale, to: 1 }]
-  if (hold > 0) phases.push({ label: 'Затримка', say: 'Затримайте', sec: hold, to: 1 })
-  phases.push({ label: 'Видих', say: 'Видихніть', sec: exhale, to: MIN_SCALE })
-  if (rest > 0) phases.push({ label: 'Пауза', say: 'Пауза', sec: rest, to: MIN_SCALE })
+  const phases: Phase[] = [{ label: 'Вдих', sound: 'inhale', sec: inhale, to: 1 }]
+  if (hold > 0) phases.push({ label: 'Затримка', sound: 'hold', sec: hold, to: 1 })
+  phases.push({ label: 'Видих', sound: 'exhale', sec: exhale, to: MIN_SCALE })
+  if (rest > 0) phases.push({ label: 'Пауза', sound: 'hold', sec: rest, to: MIN_SCALE })
   return phases
 }
 
@@ -45,6 +57,29 @@ export default function BreathingExercise({
   const tick = useRef<ReturnType<typeof setInterval> | null>(null)
   const mutedRef = useRef(false)
   mutedRef.current = muted
+  const players = useRef<Record<string, AudioPlayer> | null>(null)
+
+  // Завантаження плеєрів один раз.
+  useEffect(() => {
+    try {
+      setAudioModeAsync({ playsInSilentMode: true }).catch(() => {})
+      const p: Record<string, AudioPlayer> = {}
+      for (const key of Object.keys(SOUNDS)) p[key] = createAudioPlayer((SOUNDS as any)[key])
+      p.ambient.loop = true
+      p.ambient.volume = 0.3
+      players.current = p
+    } catch {
+      players.current = null
+    }
+    return () => {
+      Object.values(players.current ?? {}).forEach((pl) => {
+        try {
+          pl.remove()
+        } catch {}
+      })
+      players.current = null
+    }
+  }, [])
 
   const clearTick = () => {
     if (tick.current) clearInterval(tick.current)
@@ -56,29 +91,40 @@ export default function BreathingExercise({
     clearTick()
     scale.stopAnimation()
     Speech.stop()
+    try {
+      players.current?.ambient?.pause()
+    } catch {}
   }
 
   useEffect(() => () => cleanup(), [])
 
-  const speak = (text: string) => {
+  const playCue = (key: string) => {
     if (mutedRef.current) return
-    Speech.stop()
-    Speech.speak(text, { language: 'uk-UA', rate: 0.85, pitch: 1.0 })
+    const pl = players.current?.[key]
+    if (pl) {
+      pl.seekTo(0)
+        .then(() => pl.play())
+        .catch(() => {
+          try {
+            pl.play()
+          } catch {}
+        })
+      return
+    }
+    if (FALLBACK[key]) Speech.speak(FALLBACK[key], { language: 'uk-UA', rate: 0.85 })
   }
 
   const startCountdown = (sec: number) => {
     clearTick()
     setCount(sec)
-    tick.current = setInterval(() => {
-      setCount((c) => (c > 1 ? c - 1 : c))
-    }, 1000)
+    tick.current = setInterval(() => setCount((c) => (c > 1 ? c - 1 : c)), 1000)
   }
 
   const runPhase = (pIdx: number, cyc: number) => {
     if (stopped.current) return
     const ph = phases[pIdx]
     setPhaseLabel(ph.label)
-    speak(ph.say)
+    playCue(ph.sound)
     startCountdown(ph.sec)
 
     Animated.timing(scale, {
@@ -108,14 +154,40 @@ export default function BreathingExercise({
     clearTick()
     setState('done')
     setPhaseLabel('Готово')
-    if (!mutedRef.current) Speech.speak('Чудово. Вправу завершено.', { language: 'uk-UA', rate: 0.85 })
+    playCue('done')
+    setTimeout(() => {
+      try {
+        players.current?.ambient?.pause()
+      } catch {}
+    }, 4000)
   }
 
   const start = () => {
     stopped.current = false
     setCycle(1)
     setState('running')
+    if (!mutedRef.current) {
+      try {
+        players.current?.ambient?.seekTo(0)
+        players.current?.ambient?.play()
+      } catch {}
+    }
     runPhase(0, 1)
+  }
+
+  const toggleMute = () => {
+    const next = !muted
+    setMuted(next)
+    if (next) {
+      Speech.stop()
+      try {
+        players.current?.ambient?.pause()
+      } catch {}
+    } else if (state === 'running') {
+      try {
+        players.current?.ambient?.play()
+      } catch {}
+    }
   }
 
   const close = () => {
@@ -132,7 +204,7 @@ export default function BreathingExercise({
         <Pressable style={styles.close} onPress={close} hitSlop={12}>
           <Text style={styles.closeIcon}>✕</Text>
         </Pressable>
-        <Pressable style={styles.mute} onPress={() => setMuted((m) => !m)} hitSlop={12}>
+        <Pressable style={styles.mute} onPress={toggleMute} hitSlop={12}>
           <Text style={styles.muteIcon}>{muted ? '🔇' : '🔊'}</Text>
         </Pressable>
 
