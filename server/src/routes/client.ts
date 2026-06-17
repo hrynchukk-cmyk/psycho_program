@@ -27,6 +27,7 @@ const EL: Record<string, string> = {
   VIDEO: 'video',
   IMAGE: 'image',
   PAGE_BREAK: 'pageBreak',
+  BREATHING: 'breathing',
 }
 const MODE: Record<string, string> = {
   IMMEDIATELY: 'immediately',

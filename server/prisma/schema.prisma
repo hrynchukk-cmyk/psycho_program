@@ -33,6 +33,7 @@ enum ElementType {
   VIDEO
   IMAGE
   PAGE_BREAK
+  BREATHING
 }
 
 enum DeliveryMode {

@@ -34,6 +34,7 @@ const ELEMENT_TO_API: Record<ElementType, string> = {
   video: 'VIDEO',
   image: 'IMAGE',
   pageBreak: 'PAGE_BREAK',
+  breathing: 'BREATHING',
 }
 const ELEMENT_FROM_API = Object.fromEntries(
   Object.entries(ELEMENT_TO_API).map(([k, v]) => [v, k]),

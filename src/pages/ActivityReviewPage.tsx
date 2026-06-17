@@ -110,6 +110,9 @@ export default function ActivityReviewPage() {
               <div key={el.id} className="rounded-xl border border-gray-200 bg-white p-5">
                 <div className="text-sm font-medium text-gray-900">{el.title}</div>
                 {el.type === 'text' && <p className="mt-1 text-xs text-gray-400">Інформаційний блок</p>}
+                {el.type === 'breathing' && (
+                  <p className="mt-1 text-xs text-gray-400">🫁 Дихальна вправа — виконується клієнтом у застосунку</p>
+                )}
                 {isQuestion && (
                   <div className="mt-2 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-800">
                     {answer ?? <span className="text-gray-400">Без відповіді</span>}

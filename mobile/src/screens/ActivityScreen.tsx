@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { api } from '../api'
 import { Button, Card, Loading } from '../ui'
+import BreathingExercise from '../components/BreathingExercise'
 import { colors } from '../theme'
 
 // Активність відображається за елементами; інформаційні елементи не потребують відповіді.
@@ -10,6 +11,7 @@ export default function ActivityScreen({ route, navigation }: any) {
   const [activity, setActivity] = useState<any | null>(null)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(false)
+  const [breathing, setBreathing] = useState<{ pattern: number[]; title: string } | null>(null)
   const done = status === 'completed'
 
   useEffect(() => {
@@ -58,6 +60,23 @@ export default function ActivityScreen({ route, navigation }: any) {
               <Text style={styles.mediaIcon}>{el.type === 'video' ? '🎬' : '🖼️'}</Text>
               <Text style={styles.mediaText}>{el.title}</Text>
             </View>
+          ) : el.type === 'breathing' ? (
+            <Pressable
+              style={styles.breath}
+              onPress={() =>
+                setBreathing({
+                  pattern: (el.options ?? []).map((s: string) => Number(s)).filter((n: number) => !isNaN(n)),
+                  title: el.title || 'Дихальна вправа',
+                })
+              }
+            >
+              <Text style={styles.breathIcon}>🫁</Text>
+              <Text style={styles.breathTitle}>{el.title || 'Дихальна вправа'}</Text>
+              <Text style={styles.breathHint}>Керована анімація з голосом · натисніть, щоб почати</Text>
+              <View style={styles.breathBtn}>
+                <Text style={styles.breathBtnText}>Почати вправу</Text>
+              </View>
+            </Pressable>
           ) : (
             <View style={styles.field}>
               <Text style={styles.label}>{el.title}</Text>
@@ -108,6 +127,13 @@ export default function ActivityScreen({ route, navigation }: any) {
         <Button title="Надіслати відповіді" onPress={submit} loading={busy} />
       )}
       <View style={{ height: 28 }} />
+
+      <BreathingExercise
+        visible={!!breathing}
+        pattern={breathing?.pattern.length ? breathing.pattern : [4, 7, 8]}
+        title={breathing?.title}
+        onClose={() => setBreathing(null)}
+      />
     </ScrollView>
   )
 }
@@ -122,6 +148,12 @@ const styles = StyleSheet.create({
   media: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 16, alignItems: 'center' },
   mediaIcon: { fontSize: 28 },
   mediaText: { fontSize: 13, color: colors.sub, marginTop: 6, textAlign: 'center' },
+  breath: { backgroundColor: colors.brandSoft, borderWidth: 1, borderColor: colors.brandSoftBorder, borderRadius: 14, padding: 18, alignItems: 'center' },
+  breathIcon: { fontSize: 34 },
+  breathTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: 8, textAlign: 'center' },
+  breathHint: { fontSize: 12, color: colors.sub, marginTop: 4, textAlign: 'center' },
+  breathBtn: { backgroundColor: colors.brand, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 32, marginTop: 14 },
+  breathBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
   field: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 14 },
   label: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 10, lineHeight: 20 },
   input: { backgroundColor: colors.inputBg, borderWidth: 1, borderColor: colors.border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 15, color: colors.text },

@@ -18,6 +18,7 @@ import {
   Trash2,
   Type,
   Video,
+  Wind,
 } from 'lucide-react'
 import { useStore, uid } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, Toggle, inputCls } from '../components/ui'
@@ -33,6 +34,7 @@ const elementMeta: Record<ElementType, { label: string; icon: typeof Type; hint?
   scale: { label: 'Шкала 1–10', icon: SlidersHorizontal },
   video: { label: 'Відео', icon: Video },
   image: { label: 'Зображення', icon: Image },
+  breathing: { label: 'Дихальна вправа', icon: Wind, hint: 'Анімація дихання з голосом (4-7-8) у застосунку' },
   pageBreak: { label: 'Розрив сторінки', icon: SplitSquareVertical, hint: 'Наступний елемент почне нову сторінку' },
 }
 
@@ -103,8 +105,12 @@ export default function ActivityBuilderPage() {
             ? 'Нова секція'
             : type === 'text'
               ? 'Текст для клієнта…'
-              : 'Нове запитання',
+              : type === 'breathing'
+                ? 'Дихальна вправа 4-7-8'
+                : 'Нове запитання',
       ...(type === 'multipleChoice' ? { options: ['Варіант 1', 'Варіант 2'] } : {}),
+      // Патерн дихання: вдих 4 с · затримка 7 с · видих 8 с.
+      ...(type === 'breathing' ? { options: ['4', '7', '8'] } : {}),
     }
     setElements([...activity.elements, el])
     setShowAdd(false)

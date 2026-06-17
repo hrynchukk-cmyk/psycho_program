@@ -30,6 +30,7 @@ export type ElementType =
   | 'video'
   | 'image'
   | 'pageBreak'
+  | 'breathing'
 
 export interface ActivityElement {
   id: string
