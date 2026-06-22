@@ -3,6 +3,59 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, MessageSquare, RotateCcw, Send } from 'lucide-react'
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, PageHeader } from '../components/ui'
+import { scoreAssessment, CRISIS, DISCLAIMER } from '../lib/assessments'
+import type { Activity, Delivery } from '../types'
+import { AlertTriangle } from 'lucide-react'
+
+// Підсумок стандартизованого тесту: бал, інтерпретація і (за потреби) кризовий блок.
+function AssessmentSummary({ activity, delivery }: { activity: Activity; delivery: Delivery }) {
+  const result = scoreAssessment(activity.assessmentKey, activity.elements, delivery.responses ?? [])
+  if (!result) return null
+  const pct = Math.round((result.total / result.max) * 100)
+  return (
+    <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="flex flex-wrap items-center gap-5 p-5">
+        <div
+          className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-full border-[5px]"
+          style={{ borderColor: result.band.color }}
+        >
+          <span className="text-3xl font-extrabold leading-none" style={{ color: result.band.color }}>
+            {result.total}
+          </span>
+          <span className="text-xs text-gray-400">з {result.max}</span>
+        </div>
+        <div className="min-w-[200px] flex-1">
+          <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Результат · {result.def.short}</div>
+          <div className="mt-0.5 text-lg font-bold" style={{ color: result.band.color }}>
+            {result.def.name.split('—')[0].trim()}: {result.band.label}
+          </div>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: result.band.color }} />
+          </div>
+          <p className="mt-2 text-xs text-gray-500">{DISCLAIMER}</p>
+        </div>
+      </div>
+      {result.critical && (
+        <div className="border-t border-red-200 bg-red-50 p-5">
+          <div className="flex items-center gap-2 font-semibold text-red-700">
+            <AlertTriangle size={18} /> Критичний показник — потрібна увага
+          </div>
+          <p className="mt-1 text-sm text-red-800">
+            {result.riskFlag
+              ? 'Клієнт відзначив думки про самоушкодження (п. 9). '
+              : ''}
+            Загальний бал у зоні ризику. Клієнту в застосунку показано кризові ресурси.
+          </p>
+          <ul className="mt-2 space-y-1 text-sm text-red-800">
+            {CRISIS.lines.map((l) => (
+              <li key={l}>• {l}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function CommentThread({ deliveryId, elementId }: { deliveryId: string; elementId: string | null }) {
   const { comments, addComment } = useStore()
@@ -87,6 +140,8 @@ export default function ActivityReviewPage() {
           </>
         }
       />
+
+      <AssessmentSummary activity={activity} delivery={delivery} />
 
       {delivery.status !== 'completed' && (
         <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700">

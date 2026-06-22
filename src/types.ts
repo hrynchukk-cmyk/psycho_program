@@ -48,6 +48,8 @@ export interface Activity {
   pageBreaksEnabled: boolean
   isPremade: boolean
   category?: string
+  // Ключ стандартизованого тесту (phq9, gad7…) для авто-оцінки. null = звичайна активність.
+  assessmentKey?: string | null
   updatedAt: string
 }
 

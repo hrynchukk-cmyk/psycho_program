@@ -146,6 +146,8 @@ activitiesRouter.post(
         title: `${src.title} (копія)`,
         description: src.description,
         pageBreaksEnabled: src.pageBreaksEnabled,
+        category: src.category,
+        assessmentKey: src.assessmentKey,
         isPremade: false,
         practitionerId: practitionerId(req),
         elements: {

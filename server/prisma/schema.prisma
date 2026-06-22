@@ -153,6 +153,8 @@ model Activity {
   pageBreaksEnabled Boolean  @default(false)
   isPremade         Boolean  @default(false)
   category          String?
+  // Ключ стандартизованого тесту (phq9, gad7…) для авто-оцінки. null = звичайна активність.
+  assessmentKey     String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 

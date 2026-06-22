@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { api } from '../api'
 import { Button, Card, Loading } from '../ui'
 import BreathingExercise from '../components/BreathingExercise'
 import CardDeck from '../components/CardDeck'
+import { scoreAssessment, CRISIS, DISCLAIMER, type AssessmentResult } from '../assessments'
 import { colors } from '../theme'
 
 // Активність відображається за елементами; інформаційні елементи не потребують відповіді.
@@ -14,6 +15,7 @@ export default function ActivityScreen({ route, navigation }: any) {
   const [busy, setBusy] = useState(false)
   const [breathing, setBreathing] = useState<{ pattern: number[]; title: string } | null>(null)
   const [deck, setDeck] = useState<{ cards: string[]; title: string } | null>(null)
+  const [result, setResult] = useState<AssessmentResult | null>(null)
   const done = status === 'completed'
 
   useEffect(() => {
@@ -33,7 +35,13 @@ export default function ActivityScreen({ route, navigation }: any) {
         ? `/api/client/deliveries/${deliveryId}/complete`
         : `/api/client/activities/${activityId}/complete`
       await api(path, { method: 'POST', body: { responses } })
-      Alert.alert('Готово', 'Відповіді надіслано вашому психологу.', [{ text: 'OK', onPress: () => navigation.goBack() }])
+      // Стандартизований тест — рахуємо бал локально й показуємо результат.
+      const scored = scoreAssessment(activity.assessmentKey, activity.elements, responses)
+      if (scored) {
+        setResult(scored)
+      } else {
+        Alert.alert('Готово', 'Відповіді надіслано вашому психологу.', [{ text: 'OK', onPress: () => navigation.goBack() }])
+      }
     } catch {
       Alert.alert('Помилка', 'Не вдалося надіслати. Спробуйте ще раз.')
     } finally {
@@ -149,6 +157,48 @@ export default function ActivityScreen({ route, navigation }: any) {
         onClose={() => setBreathing(null)}
       />
       <CardDeck visible={!!deck} cards={deck?.cards ?? []} title={deck?.title} onClose={() => setDeck(null)} />
+
+      <Modal visible={!!result} transparent animationType="fade" onRequestClose={() => setResult(null)}>
+        <View style={styles.overlay}>
+          <ScrollView contentContainerStyle={styles.sheetWrap}>
+            {result ? (
+              <View style={styles.sheet}>
+                <Text style={styles.resKicker}>Результат · {result.def.short}</Text>
+                <View style={[styles.scoreCircle, { borderColor: result.band.color }]}>
+                  <Text style={[styles.scoreNum, { color: result.band.color }]}>{result.total}</Text>
+                  <Text style={styles.scoreMax}>з {result.max}</Text>
+                </View>
+                <Text style={[styles.bandLabel, { color: result.band.color }]}>
+                  {result.def.name.split('—')[0].trim()}: {result.band.label}
+                </Text>
+                <Text style={styles.disclaimer}>{DISCLAIMER}</Text>
+
+                {result.critical ? (
+                  <View style={styles.crisis}>
+                    <Text style={styles.crisisTitle}>{CRISIS.title}</Text>
+                    <Text style={styles.crisisIntro}>{CRISIS.intro}</Text>
+                    {CRISIS.lines.map((l) => (
+                      <Text key={l} style={styles.crisisLine}>
+                        • {l}
+                      </Text>
+                    ))}
+                    <Text style={styles.crisisNote}>Ваш психолог отримає сповіщення про цей результат.</Text>
+                  </View>
+                ) : null}
+
+                <View style={{ height: 16 }} />
+                <Button
+                  title="Готово"
+                  onPress={() => {
+                    setResult(null)
+                    navigation.goBack()
+                  }}
+                />
+              </View>
+            ) : null}
+          </ScrollView>
+        </View>
+      </Modal>
     </ScrollView>
   )
 }
@@ -186,4 +236,18 @@ const styles = StyleSheet.create({
   scaleCellSel: { backgroundColor: colors.brand, borderColor: colors.brand },
   scaleNum: { fontSize: 12, fontWeight: '700', color: colors.text2 },
   doneNote: { textAlign: 'center', color: colors.green, fontWeight: '600', fontSize: 15 },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center' },
+  sheetWrap: { padding: 20, flexGrow: 1, justifyContent: 'center' },
+  sheet: { backgroundColor: '#fff', borderRadius: 18, padding: 22, alignItems: 'center' },
+  resKicker: { fontSize: 11, fontWeight: '700', color: colors.faint, textTransform: 'uppercase', letterSpacing: 0.7 },
+  scoreCircle: { width: 116, height: 116, borderRadius: 58, borderWidth: 5, alignItems: 'center', justifyContent: 'center', marginVertical: 16 },
+  scoreNum: { fontSize: 40, fontWeight: '800' },
+  scoreMax: { fontSize: 12, color: colors.sub, marginTop: -2 },
+  bandLabel: { fontSize: 17, fontWeight: '800', textAlign: 'center' },
+  disclaimer: { fontSize: 13, color: colors.sub, textAlign: 'center', marginTop: 10, lineHeight: 19 },
+  crisis: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 14, marginTop: 16, alignSelf: 'stretch' },
+  crisisTitle: { fontSize: 15, fontWeight: '800', color: '#b91c1c' },
+  crisisIntro: { fontSize: 13, color: '#7f1d1d', marginTop: 4, marginBottom: 8, lineHeight: 19 },
+  crisisLine: { fontSize: 13, color: '#7f1d1d', lineHeight: 21 },
+  crisisNote: { fontSize: 12, color: '#991b1b', marginTop: 10, fontStyle: 'italic' },
 })

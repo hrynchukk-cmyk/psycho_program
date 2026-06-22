@@ -331,6 +331,70 @@ async function main() {
     ],
   )
 
+  // ===================== СТАНДАРТИЗОВАНІ ТЕСТИ (PHQ-9, GAD-7) =====================
+  // Вільні для використання шкали. Бал = сума індексів обраних варіантів (0–3).
+  // assessmentKey вмикає авто-оцінку й інтерпретацію в застосунку та адмінці.
+  const FREQ = ['Зовсім ні', 'Кілька днів', 'Більше половини днів', 'Майже щодня']
+
+  const assessment = (
+    title: string,
+    description: string,
+    assessmentKey: string,
+    intro: string,
+    questions: string[],
+    updated: number,
+  ) =>
+    prisma.activity.create({
+      data: {
+        title,
+        description,
+        category: 'Тест',
+        assessmentKey,
+        isPremade: true,
+        updatedAt: daysAgo(updated),
+        elements: els([
+          { type: 'TEXT', title: intro },
+          ...questions.map((q) => ({ type: 'MULTIPLE_CHOICE' as ElType, title: q, options: FREQ })),
+        ]),
+      },
+    })
+
+  const phq9 = await assessment(
+    'PHQ-9 — шкала депресії',
+    'Стандартизована шкала для скринінгу депресії (9 питань, 0–27). Допомагає відстежувати динаміку від тижня до тижня. Це не діагноз.',
+    'phq9',
+    'Протягом останніх 2 тижнів, як часто вас турбували наведені проблеми? Оберіть варіант для кожного пункту.',
+    [
+      'Мало інтересу або задоволення від справ',
+      'Пригніченість, смуток або відчуття безнадії',
+      'Проблеми із засинанням, переривчастий сон або надмірна сонливість',
+      'Відчуття втоми або браку енергії',
+      'Поганий апетит або переїдання',
+      'Погана думка про себе — відчуття невдахи або що підвели себе чи близьких',
+      'Труднощі з концентрацією (читання, перегляд телевізора тощо)',
+      'Сповільненість у рухах/мовленні або навпаки — надмірна метушливість, помітні іншим',
+      'Думки, що краще було б померти, або про те, щоб завдати собі шкоди',
+    ],
+    9,
+  )
+
+  const gad7 = await assessment(
+    'GAD-7 — шкала тривоги',
+    'Стандартизована шкала для скринінгу тривожності (7 питань, 0–21). Поріг ймовірного розладу — від 10 балів. Це не діагноз.',
+    'gad7',
+    'Протягом останніх 2 тижнів, як часто вас турбували наведені проблеми? Оберіть варіант для кожного пункту.',
+    [
+      'Нервозність, тривога або відчуття «на межі»',
+      'Неможливість зупинити чи контролювати тривогу',
+      'Надмірне хвилювання щодо різних речей',
+      'Труднощі з розслабленням',
+      'Така непосидючість, що важко всидіти на місці',
+      'Легко дратуєтесь або стаєте роздратованим',
+      'Відчуття страху, ніби має статися щось жахливе',
+    ],
+    9,
+  )
+
   // ===================== ВЛАСНІ АКТИВНОСТІ ПСИХОЛОГА =====================
   const gratitude = await prisma.activity.create({
     data: {
@@ -549,6 +613,25 @@ async function main() {
       { deliveryId: completed.id, elementId: null, author: 'PRACTITIONER', text: 'Гарна робота із заповненням! Обговоримо результати на сесії в четвер.', createdAt: daysAgo(4) },
     ],
   })
+  // Завершений PHQ-9 від Андрія — щоб у адмінці було видно авто-оцінку (бал/смуга/безпека).
+  const phqEls = await prisma.activityElement.findMany({
+    where: { activityId: phq9.id, type: 'MULTIPLE_CHOICE' },
+    orderBy: { order: 'asc' },
+  })
+  // Відповіді за індексами варіантів: помірно-важка депресія, без ризику за п.9.
+  const phqAnswerIdx = [2, 2, 3, 2, 1, 2, 2, 1, 0] // сума = 15 (помірно-важка)
+  await prisma.delivery.create({
+    data: {
+      kind: 'ACTIVITY',
+      refId: phq9.id,
+      clientId: andrii.id,
+      sentAt: daysAgo(5),
+      status: 'COMPLETED',
+      completedAt: daysAgo(4),
+      responses: phqEls.map((e, i) => ({ elementId: e.id, answer: FREQ[phqAnswerIdx[i] ?? 0] })),
+    },
+  })
+
   await prisma.delivery.createMany({
     data: [
       // Демо-клієнт Олена — насичений набір для мобільного застосунку.
@@ -558,6 +641,9 @@ async function main() {
       { kind: 'ACTIVITY', refId: gratitude.id, clientId: olena.id, sentAt: daysAgo(3), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: grounding.id, clientId: olena.id, sentAt: daysAgo(1), status: 'SENT' },
       { kind: 'ACTIVITY', refId: bodyScan.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
+      // Стандартизовані тести — щотижневий моніторинг.
+      { kind: 'ACTIVITY', refId: phq9.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
+      { kind: 'ACTIVITY', refId: gad7.id, clientId: olena.id, sentAt: daysAgo(0), status: 'SENT' },
       // Інші клієнти.
       { kind: 'PROGRAM', refId: anxietyProgram.id, clientId: ihor.id, sentAt: daysAgo(10), status: 'IN_PROGRESS' },
       { kind: 'ACTIVITY', refId: grounding.id, clientId: ihor.id, sentAt: daysAgo(1), status: 'SENT' },

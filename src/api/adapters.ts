@@ -90,6 +90,7 @@ export const adaptActivity = (a: any): Activity => ({
   pageBreaksEnabled: a.pageBreaksEnabled,
   isPremade: a.isPremade,
   category: a.category ?? undefined,
+  assessmentKey: a.assessmentKey ?? null,
   updatedAt: a.updatedAt,
 })
 

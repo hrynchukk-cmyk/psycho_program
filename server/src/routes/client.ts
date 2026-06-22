@@ -43,6 +43,7 @@ const normActivity = (a: any) => ({
   title: a.title,
   description: a.description ?? '',
   pageBreaksEnabled: a.pageBreaksEnabled,
+  assessmentKey: a.assessmentKey ?? null,
   elements: (a.elements ?? []).map(normElement),
 })
 
