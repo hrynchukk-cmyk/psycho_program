@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Psycho Program — мобільний застосунок (новий дизайн)</title>
+<style>
+  :root{
+    --espresso:#2E1E12; --text2:#5C4433; --sub:#9E8B7A; --faint:#A89A85;
+    --bg:#F5EFE6; --cream:#FFFDF9; --beige:#F4ECDD; --border:#E7DCC9;
+    --eyebrow:#A0683A; --gold:#C4933A; --goldText:#EBC979; --goldSoft:#F7EBD0;
+    --green:#3E7A4E; --greenSoft:#E4EFE3; --danger:#C0392B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  body{background:#efe6d8;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--espresso);padding:32px 18px 60px}
+  .serif{font-family:Georgia,'Times New Roman',serif}
+  h1.page{font-family:Georgia,serif;font-weight:600;font-size:24px;text-align:center;color:var(--espresso)}
+  p.lead{text-align:center;color:var(--text2);margin:6px 0 26px;font-size:14px}
+  .row{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+  .phone{width:300px;background:var(--bg);border-radius:34px;border:9px solid #221812;box-shadow:0 18px 40px rgba(44,31,20,.28);overflow:hidden}
+  .scr{height:600px;display:flex;flex-direction:column}
+  .status{display:flex;justify-content:space-between;align-items:center;padding:11px 18px 4px;font-size:12px;font-weight:700;color:#2C1F14}
+  .nav{display:flex;align-items:center;gap:10px;padding:6px 16px 10px}
+  .nav .back{color:#6B3F24;font-size:20px}
+  .nav .ttl{font-family:Georgia,serif;font-size:18px}
+  .body{flex:1;overflow:hidden;padding:6px 16px}
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--eyebrow);text-transform:uppercase;margin:16px 0 8px}
+  .card{background:var(--cream);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:0 3px 10px rgba(92,68,51,.06);margin-bottom:10px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;margin-bottom:6px}
+  .pill.proc{background:var(--beige);color:#6B3F24}
+  .pill.new{background:var(--goldSoft);color:var(--eyebrow)}
+  .pill.done{background:var(--greenSoft);color:var(--green)}
+  .itemrow{display:flex;gap:12px;align-items:flex-start}
+  .tile{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex:none}
+  .tile.gold{background:var(--goldSoft)} .tile.beige{background:var(--beige)}
+  .ctitle{font-weight:700;font-size:14px;color:var(--espresso)}
+  .cdesc{font-size:12px;color:var(--sub);margin-top:2px}
+  .meta{font-size:11px;color:var(--faint);margin-top:5px}
+  .btn{display:block;text-align:center;background:var(--espresso);color:var(--goldText);font-weight:700;letter-spacing:.4px;border-radius:14px;padding:15px;font-size:15px}
+  .btn.sec{background:var(--cream);color:#6B3F24;border:1px solid var(--border)}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--gold);color:var(--espresso);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+  .input{background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--sub);margin-top:6px}
+  .label{font-size:13px;font-weight:600;margin-top:12px}
+  .tabbar{display:flex;justify-content:space-around;background:var(--cream);border-top:1px solid var(--border);padding:9px 0 12px}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--faint)}
+  .tab .ic{font-size:19px}
+  .tab.on{color:var(--espresso)}
+  .logo{width:66px;height:66px;border-radius:20px;background:var(--beige);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold);margin:0 auto;box-shadow:0 6px 12px rgba(92,68,51,.12)}
+  .tagline{text-align:center;font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--eyebrow);margin:6px 0 24px}
+  .segment{display:flex;background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:16px}
+  .seg{flex:1;text-align:center;padding:9px;border-radius:9px;font-weight:600;font-size:13px;color:var(--sub)}
+  .seg.on{background:var(--beige);color:#6B3F24}
+  .moods{display:flex;gap:5px;margin:8px 0 12px}
+  .mood{flex:1;border:2px solid var(--border);background:#FBF7F0;border-radius:10px;padding:7px 2px;text-align:center}
+  .mood.on{border-color:var(--green);background:var(--greenSoft)}
+  .mood .em{font-size:18px} .mood .lb{font-size:8px;font-weight:700;color:var(--faint);margin-top:2px}
+  .mood.on .lb{color:var(--green)}
+  .scale{display:flex;gap:3px;margin-top:8px}
+  .sc{flex:1;height:34px;border-radius:6px;background:#F0E8DB;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--text2)}
+  .sc.on{background:var(--gold);border-color:var(--gold);color:var(--espresso)}
+  .opt{display:flex;align-items:center;gap:9px;background:#FBF7F0;border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;margin-top:7px;font-size:14px;color:var(--text2)}
+  .opt.on{border-color:#6B3F24;background:var(--beige);color:#6B3F24;font-weight:600}
+  .radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border)} .opt.on .radio{border-color:#6B3F24;background:#6B3F24}
+  .reply{background:var(--beige);border-left:3px solid #6B3F24;border-radius:9px;padding:11px;margin-top:10px}
+  .reply .rl{font-size:9px;font-weight:700;color:#6B3F24;text-transform:uppercase;letter-spacing:.5px}
+  .reply .rt{font-size:13px;color:var(--text2);margin-top:3px}
+  .timeline{display:flex;gap:10px}
+  .dot{width:24px;height:24px;border-radius:50%;background:#6B3F24;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+  .dot.done{background:var(--gold);color:var(--espresso)}
+  .chev{color:var(--faint);font-size:20px}
+  .caption{font-size:12px;color:var(--text2);font-weight:600;text-align:center;margin-top:10px}
+  small.k{display:block;text-align:center;color:var(--sub);font-size:11px;margin-top:24px}
+</style>
+</head>
+<body>
+  <h1 class="page">Psycho Program — застосунок клієнта</h1>
+  <p class="lead">Новий дизайн у теплій палітрі «еспресо й вершки» · 7 екранів</p>
+
+  <div class="row">
+
+    <!-- 01 ВХІД -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="body">
+        <div style="height:34px"></div>
+        <div class="logo">♥</div>
+        <div class="serif" style="text-align:center;font-size:26px;margin-top:16px">Psycho Program</div>
+        <div class="tagline">♥ ПРОСТІР ТУРБОТИ ПРО СЕБЕ</div>
+        <div class="segment"><div class="seg on">Вхід</div><div class="seg">За запрошенням</div></div>
+        <div class="label">EMAIL</div><div class="input">olena@example.com</div>
+        <div class="label">ПАРОЛЬ</div><div class="input">••••••••</div>
+        <div style="height:16px"></div>
+        <div class="btn">УВІЙТИ</div>
+      </div>
+    </div></div>
+
+    <!-- 02 ГОЛОВНА -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="body">
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:16px">
+          <div style="flex:1">
+            <div class="serif" style="font-size:22px">Вітаємо, Олено</div>
+            <div style="font-size:12px;color:var(--sub);margin-top:4px">Психолог: Марина Ковальчук</div>
+          </div>
+          <div class="avatar">ОК</div>
+        </div>
+        <div class="eyebrow">Програми</div>
+        <div class="card"><div class="itemrow"><div class="tile gold">🧘</div><div>
+          <span class="pill proc">В процесі</span>
+          <div class="ctitle">Основи усвідомленості</div>
+          <div class="cdesc">6-тижнева програма</div>
+          <div class="meta">📋 6 кроків · Крок 3 з 6</div></div></div></div>
+        <div class="eyebrow">Активності</div>
+        <div class="card"><div class="itemrow"><div class="tile beige">🌬️</div><div>
+          <span class="pill new">Нове</span>
+          <div class="ctitle">Дихальна вправа</div>
+          <div class="cdesc">Техніка 4-7-8</div></div></div></div>
+        <div class="card"><div class="itemrow"><div class="tile beige">📝</div><div>
+          <span class="pill proc">В процесі</span>
+          <div class="ctitle">Щотижневий огляд</div>
+          <div class="cdesc">Запитання про тиждень</div></div></div></div>
+      </div>
+      <div class="tabbar">
+        <div class="tab on"><span class="ic">🏠</span>Головна</div>
+        <div class="tab"><span class="ic">📔</span>Щоденник</div>
+        <div class="tab"><span class="ic">📚</span>Матеріали</div>
+        <div class="tab"><span class="ic">👤</span>Профіль</div>
+      </div>
+    </div></div>
+
+    <!-- 03 ПРОГРАМА -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="nav"><span class="back">←</span><span class="ttl">Програма</span></div>
+      <div class="body">
+        <div class="card">
+          <div style="font-size:28px">🧘</div>
+          <div class="ctitle" style="font-size:18px;margin-top:6px">Основи усвідомленості</div>
+          <div class="cdesc">6-тижнева програма для зниження тривоги.</div>
+          <span class="pill proc" style="margin-top:10px">В процесі · Крок 3 з 6</span>
+        </div>
+        <div class="eyebrow">Кроки програми</div>
+        <div class="card">
+          <div class="timeline" style="padding-bottom:12px"><div class="dot done">✓</div><div><div class="ctitle">Вступ і постановка цілей</div><div class="meta">Відкрито одразу</div></div></div>
+          <div class="timeline" style="padding-bottom:12px"><div class="dot done">✓</div><div><div class="ctitle">Техніки дихання</div><div class="meta">Через 3 дні</div></div></div>
+          <div class="timeline" style="padding-bottom:12px"><div class="dot">3</div><div><div class="ctitle">Щотижневий огляд</div><div class="meta">↑ Поточний · через 7 днів</div></div></div>
+          <div class="timeline"><div class="dot" style="background:#C9B79C">4</div><div><div class="ctitle" style="color:var(--faint)">Робота з тривожними думками</div><div class="meta">Через 14 днів</div></div></div>
+        </div>
+      </div>
+    </div></div>
+
+    <!-- 04 АКТИВНІСТЬ -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="nav"><span class="back">←</span><span class="ttl">Активність</span></div>
+      <div class="body">
+        <div class="card"><div class="eyebrow" style="margin:0 0 4px">Активність</div>
+          <div class="ctitle" style="font-size:18px">Щотижневий огляд</div>
+          <div class="cdesc">Кілька запитань про ваш стан.</div></div>
+        <div class="eyebrow">Самопочуття</div>
+        <div class="card">
+          <div style="font-weight:600;font-size:14px">Оцініть настрій за тиждень</div>
+          <div class="scale">
+            <div class="sc">1</div><div class="sc">2</div><div class="sc">3</div><div class="sc">4</div><div class="sc">5</div>
+            <div class="sc">6</div><div class="sc on">7</div><div class="sc">8</div><div class="sc">9</div><div class="sc">10</div>
+          </div>
+          <div style="font-weight:600;font-size:14px;margin-top:14px">Порівняно з минулим тижнем…</div>
+          <div class="opt on"><span class="radio"></span>Краще</div>
+          <div class="opt"><span class="radio"></span>Приблизно так само</div>
+          <div class="opt"><span class="radio"></span>Гірше</div>
+        </div>
+        <div class="btn">НАДІСЛАТИ ВІДПОВІДІ</div>
+      </div>
+    </div></div>
+
+    <!-- 05 ЩОДЕННИК -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="body">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <div class="serif" style="font-size:24px">Щоденник</div>
+          <div class="btn sec" style="padding:9px 14px;font-size:13px">+ Запис</div>
+        </div>
+        <div style="font-size:13px;color:var(--sub);margin:6px 0 4px">Як ви почуваєтесь?</div>
+        <div class="card">
+          <div class="moods">
+            <div class="mood on"><div class="em">😊</div><div class="lb">Чудово</div></div>
+            <div class="mood"><div class="em">🙂</div><div class="lb">Добре</div></div>
+            <div class="mood"><div class="em">😐</div><div class="lb">Нейтр.</div></div>
+            <div class="mood"><div class="em">😟</div><div class="lb">Погано</div></div>
+            <div class="mood"><div class="em">😢</div><div class="lb">Дуже пог.</div></div>
+          </div>
+          <div class="input">Заголовок (необовʼязково)</div>
+          <div class="input" style="height:56px">Запишіть, як минає ваш день…</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between"><span class="pill done">🙂 Добре</span><span class="meta">Вчора, 21:15</span></div>
+          <div class="ctitle" style="margin-top:6px">Після робочого дня</div>
+          <div class="cdesc">Втомилась, але впоралась зі складною задачею.</div>
+          <div class="reply"><div class="rl">Відповідь психолога</div><div class="rt">Відмічати маленькі перемоги — важливо.</div></div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><span class="ic">🏠</span>Головна</div>
+        <div class="tab on"><span class="ic">📔</span>Щоденник</div>
+        <div class="tab"><span class="ic">📚</span>Матеріали</div>
+        <div class="tab"><span class="ic">👤</span>Профіль</div>
+      </div>
+    </div></div>
+
+    <!-- 06 МАТЕРІАЛИ -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="body">
+        <div class="serif" style="font-size:24px;margin-top:6px">Матеріали</div>
+        <div style="font-size:13px;color:var(--sub);margin:4px 0 12px">Файли та посилання від психолога</div>
+        <div class="card" style="display:flex;align-items:center;gap:11px;padding:11px"><div class="tile gold">📄</div><div style="flex:1"><div class="ctitle">Введення в КПТ.pdf</div><div class="meta">PDF · 1.2 МБ</div></div><span class="chev">›</span></div>
+        <div class="card" style="display:flex;align-items:center;gap:11px;padding:11px"><div class="tile" style="background:var(--greenSoft)">🔗</div><div style="flex:1"><div class="ctitle">Медитація для початківців</div><div class="meta">YouTube · відеоурок</div></div><span class="chev">›</span></div>
+        <div class="card" style="display:flex;align-items:center;gap:11px;padding:11px"><div class="tile gold">📄</div><div style="flex:1"><div class="ctitle">Щоденник вдячності.docx</div><div class="meta">Документ · 280 КБ</div></div><span class="chev">›</span></div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><span class="ic">🏠</span>Головна</div>
+        <div class="tab"><span class="ic">📔</span>Щоденник</div>
+        <div class="tab on"><span class="ic">📚</span>Матеріали</div>
+        <div class="tab"><span class="ic">👤</span>Профіль</div>
+      </div>
+    </div></div>
+
+    <!-- 07 ПРОФІЛЬ -->
+    <div class="phone"><div class="scr">
+      <div class="status"><span>9:41</span><span>●●● ▮</span></div>
+      <div class="body">
+        <div class="card" style="text-align:center;padding:24px 14px">
+          <div class="avatar" style="width:64px;height:64px;font-size:22px;margin:0 auto">ОК</div>
+          <div class="serif" style="font-size:22px;margin-top:12px">Олена Коваль</div>
+          <div style="font-size:13px;color:var(--sub);margin-top:4px">olena@example.com</div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:11px"><div class="tile gold" style="width:32px;height:32px;font-size:15px">🧑‍⚕️</div><div><div class="eyebrow" style="margin:0">Ваш психолог</div><div class="ctitle">Марина Ковальчук</div></div></div>
+        <div class="card" style="display:flex;align-items:center;gap:11px"><div class="tile" style="background:var(--goldSoft);width:32px;height:32px;font-size:15px">📅</div><div><div class="eyebrow" style="margin:0">В терапії з</div><div class="ctitle">1 квітня 2026</div></div></div>
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:11px"><div class="tile" style="background:#FBEEE9;width:32px;height:32px;font-size:15px">🚪</div><div style="font-weight:600;color:var(--danger)">Вийти</div></div><span class="chev">›</span></div>
+      </div>
+      <div class="tabbar">
+        <div class="tab"><span class="ic">🏠</span>Головна</div>
+        <div class="tab"><span class="ic">📔</span>Щоденник</div>
+        <div class="tab"><span class="ic">📚</span>Матеріали</div>
+        <div class="tab on"><span class="ic">👤</span>Профіль</div>
+      </div>
+    </div></div>
+
+  </div>
+  <small class="k">Кольори, типографіка й компоненти відповідають реалізації в коді (theme.ts). Це статичний прев'ю — справжній застосунок запускається через <b>expo start</b>.</small>
+</body>
+</html>

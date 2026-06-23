@@ -1,41 +1,57 @@
+import { Platform } from 'react-native'
+
+// Палітра «еспресо й вершки»: тепла, спокійна, для простору турботи про себе.
+// Темний еспресо для тексту/кнопок, кремові поверхні, золотий акцент і теракота
+// для рубрик. Усі попередні ключі збережені (перемаплені у теплі тони), щоб
+// нічого не зламати; нові акценти — gold/eyebrow/cream.
 export const colors = {
-  brand: '#3d6bef',
-  brandDark: '#274ce4',
-  brandSoft: '#eef4ff',
-  brandSoftBorder: '#c7d7fa',
-  brandSoftText: '#4060d4',
-  bg: '#f4f6fb',
-  card: '#ffffff',
-  text: '#111827',
-  text2: '#374151',
-  sub: '#6b7280',
-  faint: '#9ca3af',
-  hairline: '#f0f1f4',
-  border: '#e5e7eb',
-  inputBg: '#f9fafb',
-  green: '#059669',
-  greenSoft: '#d1fae5',
-  amber: '#d97706',
-  amberSoft: '#fef3c7',
-  blueSoft: '#dbeafe',
-  blueText: '#1d4ed8',
-  violetSoft: '#ede9fe',
-  violetText: '#6d28d9',
-  danger: '#dc2626',
-  dangerSoft: '#fee2e2',
-  fileTile: '#fff7ed',
-  linkTile: '#f0fdf4',
+  brand: '#6B3F24', // насичений коричневий — основний акцент (текст/іконки)
+  brandDark: '#2E1E12', // еспресо — заливка основних кнопок
+  brandSoft: '#F4ECDD', // тепла бежева мʼяка поверхня
+  brandSoftBorder: '#E7DCC9',
+  brandSoftText: '#A0683A', // теракота
+  bg: '#F5EFE6', // кремовий фон екрана
+  card: '#FFFDF9', // кремова картка
+  text: '#2E1E12', // еспресо (основний текст)
+  text2: '#5C4433', // середній коричневий (вторинний)
+  sub: '#9E8B7A', // приглушений таупе
+  faint: '#A89A85', // ледь помітний таупе (неактивні таби, підказки)
+  hairline: '#F0E8DB',
+  border: '#E7DCC9', // бежева рамка
+  inputBg: '#FBF7F0', // кремовий інпут
+  green: '#3E7A4E',
+  greenSoft: '#E4EFE3',
+  amber: '#A0683A', // тепла теракота
+  amberSoft: '#F7EBD0',
+  blueSoft: '#F4ECDD',
+  blueText: '#6B3F24',
+  violetSoft: '#F4E6D6',
+  violetText: '#A0683A',
+  danger: '#C0392B',
+  dangerSoft: '#FBEEE9',
+  fileTile: '#F7EBD0', // тепла золотиста плитка
+  linkTile: '#E4EFE3', // мʼяка зелена плитка
+  // Нові акценти
+  gold: '#C4933A', // золото — серце, виділення
+  goldSoft: '#F7EBD0',
+  goldText: '#EBC979', // золотий текст на темних кнопках
+  eyebrow: '#A0683A', // теракота — підписи-рубрики (UPPERCASE)
+  cream: '#FFFDF9',
 }
+
+// Зарубка-шрифт із засічками для брендових заголовків (як Georgia в макеті).
+// Без бандлу шрифтів: системні засічки на кожній платформі.
+export const serif = Platform.select({ ios: 'Georgia', android: 'serif', default: 'Georgia' })
 
 export type Mood = 'great' | 'good' | 'neutral' | 'low' | 'bad'
 
 // Кожен настрій: емодзі, повний і короткий підпис, колір тексту й мʼякий фон пігулки.
 export const moods: { key: Mood; emoji: string; label: string; short: string; color: string; soft: string }[] = [
-  { key: 'great', emoji: '😄', label: 'Чудово', short: 'Чудово', color: '#059669', soft: '#d1fae5' },
-  { key: 'good', emoji: '🙂', label: 'Добре', short: 'Добре', color: '#65a30d', soft: '#ecfccb' },
-  { key: 'neutral', emoji: '😐', label: 'Нейтрально', short: 'Нейтр.', color: '#6b7280', soft: '#f3f4f6' },
-  { key: 'low', emoji: '😟', label: 'Погано', short: 'Погано', color: '#d97706', soft: '#fef3c7' },
-  { key: 'bad', emoji: '😢', label: 'Дуже погано', short: 'Дуже пог.', color: '#dc2626', soft: '#fee2e2' },
+  { key: 'great', emoji: '😊', label: 'Чудово', short: 'Чудово', color: '#3E7A4E', soft: '#E4EFE3' },
+  { key: 'good', emoji: '🙂', label: 'Добре', short: 'Добре', color: '#6B8E3D', soft: '#EDF0DF' },
+  { key: 'neutral', emoji: '😐', label: 'Нейтрально', short: 'Нейтр.', color: '#9E8B7A', soft: '#F0E8DB' },
+  { key: 'low', emoji: '😟', label: 'Погано', short: 'Погано', color: '#A0683A', soft: '#F7EBD0' },
+  { key: 'bad', emoji: '😢', label: 'Дуже погано', short: 'Дуже пог.', color: '#C0392B', soft: '#FBEEE9' },
 ]
 
 // Нечутливо до регістру: /api/journal віддає настрій у ВЕРХНЬОМУ регістрі.

@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useAuth } from '../auth'
 import { Card } from '../ui'
 import { Avatar } from '../components/Logo'
-import { colors } from '../theme'
+import { colors, serif } from '../theme'
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth()
@@ -22,11 +22,11 @@ export default function ProfileScreen() {
       {user?.practitioner ? (
         <Card style={{ marginTop: 12, padding: 0 }}>
           <View style={styles.row}>
-            <View style={[styles.rowTile, { backgroundColor: colors.brandSoft }]}>
+            <View style={[styles.rowTile, { backgroundColor: colors.goldSoft }]}>
               <Text style={styles.rowIcon}>🧑‍⚕️</Text>
             </View>
             <View>
-              <Text style={styles.rowLabel}>Ваш психолог</Text>
+              <Text style={styles.rowLabel}>ВАШ ПСИХОЛОГ</Text>
               <Text style={styles.rowValue}>{user.practitioner}</Text>
             </View>
           </View>
@@ -52,16 +52,16 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  name: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 12 },
-  email: { fontSize: 13, color: colors.sub, marginTop: 3 },
+  name: { fontSize: 22, fontFamily: serif, color: colors.text, marginTop: 12 },
+  email: { fontSize: 13, color: colors.sub, marginTop: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 12 },
   rowTile: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   rowIcon: { fontSize: 15 },
-  rowLabel: { fontSize: 10, color: colors.faint, marginBottom: 1 },
+  rowLabel: { fontSize: 10, color: colors.eyebrow, marginBottom: 2, letterSpacing: 0.8, fontWeight: '700' },
   rowValue: { fontSize: 13, fontWeight: '600', color: colors.text },
   logoutRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12 },
   logoutLeft: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   logoutText: { fontSize: 14, fontWeight: '600', color: colors.danger },
-  chevron: { fontSize: 20, color: '#d1d5db' },
+  chevron: { fontSize: 20, color: colors.faint },
   version: { textAlign: 'center', color: colors.faint, fontSize: 12, marginTop: 24 },
 })

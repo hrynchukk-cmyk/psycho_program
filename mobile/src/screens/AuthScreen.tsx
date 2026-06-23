@@ -4,7 +4,7 @@ import { useAuth } from '../auth'
 import { ApiError } from '../api'
 import { Button } from '../ui'
 import { Logo } from '../components/Logo'
-import { colors } from '../theme'
+import { colors, serif } from '../theme'
 
 export default function AuthScreen() {
   const { login, claim } = useAuth()
@@ -31,10 +31,10 @@ export default function AuthScreen() {
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.logo}>
-          <Logo size={64} />
+          <Logo size={66} />
         </View>
         <Text style={styles.title}>Psycho Program</Text>
-        <Text style={styles.subtitle}>Застосунок для клієнтів</Text>
+        <Text style={styles.tagline}>♥ ПРОСТІР ТУРБОТИ ПРО СЕБЕ</Text>
 
         <View style={styles.tabs}>
           <Text
@@ -91,14 +91,14 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: { padding: 24, paddingTop: 80, flexGrow: 1 },
   logo: { alignSelf: 'center' },
-  title: { textAlign: 'center', fontSize: 22, fontWeight: '800', color: colors.text, marginTop: 14 },
-  subtitle: { textAlign: 'center', fontSize: 14, color: colors.sub, marginTop: 2, marginBottom: 24 },
-  tabs: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 4, marginBottom: 16 },
+  title: { textAlign: 'center', fontSize: 26, fontFamily: serif, color: colors.text, marginTop: 16 },
+  tagline: { textAlign: 'center', fontSize: 11, fontWeight: '700', color: colors.eyebrow, letterSpacing: 1.2, marginTop: 6, marginBottom: 26 },
+  tabs: { flexDirection: 'row', backgroundColor: colors.cream, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 4, marginBottom: 16 },
   tab: { flex: 1, textAlign: 'center', paddingVertical: 9, borderRadius: 9, fontWeight: '600', color: colors.sub, overflow: 'hidden' },
-  tabActive: { backgroundColor: colors.brandSoft, color: colors.brandDark },
+  tabActive: { backgroundColor: colors.brandSoft, color: colors.brand },
   hint: { fontSize: 13, color: colors.sub, marginBottom: 14, lineHeight: 18 },
   label: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 6, marginTop: 10 },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.text },
+  input: { backgroundColor: colors.cream, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 15, color: colors.text },
   error: { color: colors.danger, fontSize: 13, marginTop: 12 },
   note: { textAlign: 'center', color: colors.faint, fontSize: 12, marginTop: 18 },
 })

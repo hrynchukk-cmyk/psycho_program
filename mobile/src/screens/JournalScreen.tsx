@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native'
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import { api, API_BASE, tokenStore } from '../api'
 import { Button, Card, Empty, Loading } from '../ui'
-import { colors, formatDateTime, moods, moodMeta } from '../theme'
+import { colors, serif, formatDateTime, moods, moodMeta } from '../theme'
 import { useVoiceRecorder, readBase64, formatClock } from '../useVoiceRecorder'
 
 // Відтворення голосової нотатки (захищене аудіо — з токеном у заголовках).
@@ -240,7 +240,7 @@ export default function JournalScreen() {
 
 const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  h1: { fontSize: 22, fontWeight: '800', color: colors.text },
+  h1: { fontSize: 24, fontFamily: serif, color: colors.text },
   sub: { fontSize: 14, color: colors.sub, marginTop: 4 },
   formLabel: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 9 },
   moodRow: { flexDirection: 'row', gap: 5, marginBottom: 12 },

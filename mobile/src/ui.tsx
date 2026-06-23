@@ -34,9 +34,11 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isPrimary ? '#fff' : colors.brand} />
+        <ActivityIndicator color={isPrimary ? colors.goldText : colors.brand} />
       ) : (
-        <Text style={[styles.btnText, isPrimary ? { color: '#fff' } : { color: colors.brand }]}>{title}</Text>
+        <Text style={[styles.btnText, isPrimary ? { color: colors.goldText, letterSpacing: 0.4 } : { color: colors.brand }]}>
+          {title}
+        </Text>
       )}
     </Pressable>
   )
@@ -70,26 +72,26 @@ export function Empty({ title, hint }: { title: string; hint?: string }) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.card,
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: '#1c2540',
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
-  },
-  btn: { borderRadius: 12, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
-  btnPrimary: {
-    backgroundColor: colors.brand,
-    shadowColor: colors.brand,
-    shadowOpacity: 0.35,
+    shadowColor: '#5C4433',
+    shadowOpacity: 0.06,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
+    elevation: 1,
+  },
+  btn: { borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center' },
+  btnPrimary: {
+    backgroundColor: colors.brandDark,
+    shadowColor: colors.brandDark,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-  btnSecondary: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },
+  btnSecondary: { backgroundColor: colors.cream, borderWidth: 1, borderColor: colors.border },
   btnGhost: { backgroundColor: 'transparent' },
   btnText: { fontSize: 15, fontWeight: '700' },
   pill: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2.5, alignSelf: 'flex-start' },

@@ -5,12 +5,12 @@ import { api } from '../api'
 import { useAuth } from '../auth'
 import { Card, Empty, Loading, Pill } from '../ui'
 import { Avatar } from '../components/Logo'
-import { colors } from '../theme'
+import { colors, serif } from '../theme'
 
 const statusPill = (s: string) => {
   if (s === 'completed') return <Pill text="Завершено" bg={colors.greenSoft} color={colors.green} />
   if (s === 'inProgress') return <Pill text="В процесі" bg={colors.brandSoft} color={colors.brand} />
-  return <Pill text="Нове" bg={colors.amberSoft} color={colors.amber} />
+  return <Pill text="Нове" bg={colors.goldSoft} color={colors.eyebrow} />
 }
 
 function ItemCard({ icon, tint, status, title, desc, meta, onPress }: any) {
@@ -65,11 +65,11 @@ export default function HomeScreen({ navigation }: any) {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <Card style={styles.header}>
-        <Avatar initials={initials} size={40} />
-        <View style={{ flex: 1 }}>
-          <Text style={styles.hello}>Вітаємо, {user?.firstName}! 👋</Text>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text style={styles.hello}>Вітаємо, {user?.firstName}</Text>
           {user?.practitioner ? <Text style={styles.headerSub}>Психолог: {user.practitioner}</Text> : null}
         </View>
+        <Avatar initials={initials} size={44} />
       </Card>
 
       {programs.length > 0 && <Text style={styles.section}>Програми</Text>}
@@ -77,7 +77,7 @@ export default function HomeScreen({ navigation }: any) {
         <ItemCard
           key={d.id}
           icon="🧘"
-          tint={colors.brandSoft}
+          tint={colors.goldSoft}
           status={d.status}
           title={d.program?.title ?? 'Програма'}
           desc={d.program?.description}
@@ -91,7 +91,7 @@ export default function HomeScreen({ navigation }: any) {
         <ItemCard
           key={d.id}
           icon="📝"
-          tint="#eff6ff"
+          tint={colors.brandSoft}
           status={d.status}
           title={d.activity?.title ?? 'Активність'}
           desc={d.activity?.description}
@@ -109,10 +109,10 @@ export default function HomeScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6, paddingVertical: 14 },
-  hello: { fontSize: 17, fontWeight: '800', color: colors.text },
-  headerSub: { fontSize: 12, color: colors.sub, marginTop: 2 },
-  section: { fontSize: 11, fontWeight: '700', color: colors.faint, textTransform: 'uppercase', marginTop: 16, marginBottom: 8, letterSpacing: 0.7 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 6, paddingVertical: 16 },
+  hello: { fontSize: 22, fontFamily: serif, color: colors.text },
+  headerSub: { fontSize: 12, color: colors.sub, marginTop: 4 },
+  section: { fontSize: 11, fontWeight: '700', color: colors.eyebrow, textTransform: 'uppercase', marginTop: 18, marginBottom: 8, letterSpacing: 1 },
   card: { flexDirection: 'row', gap: 12, alignItems: 'flex-start', marginBottom: 10, padding: 12 },
   iconTile: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
   icon: { fontSize: 19 },

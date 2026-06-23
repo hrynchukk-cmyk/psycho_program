@@ -248,7 +248,7 @@ export default function BreathingExercise({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#16204f', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  root: { flex: 1, backgroundColor: '#241813', alignItems: 'center', justifyContent: 'center', padding: 24 },
   close: { position: 'absolute', top: 52, right: 22 },
   closeIcon: { color: 'rgba(255,255,255,0.7)', fontSize: 22, fontWeight: '600' },
   mute: { position: 'absolute', top: 52, left: 22 },
@@ -256,15 +256,15 @@ const styles = StyleSheet.create({
   title: { color: '#fff', fontSize: 17, fontWeight: '800', textAlign: 'center' },
   cycle: { color: 'rgba(255,255,255,0.55)', fontSize: 13, marginTop: 6, fontWeight: '600' },
   stage: { width: 300, height: 300, alignItems: 'center', justifyContent: 'center', marginVertical: 30 },
-  ring: { width: 260, height: 260, borderRadius: 130, borderWidth: 2, borderColor: 'rgba(125,155,255,0.45)', alignItems: 'center', justifyContent: 'center' },
-  orb: { width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(98,134,255,0.35)' },
+  ring: { width: 260, height: 260, borderRadius: 130, borderWidth: 2, borderColor: 'rgba(232,192,106,0.45)', alignItems: 'center', justifyContent: 'center' },
+  orb: { width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(232,192,106,0.30)' },
   centerText: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
   phase: { color: '#fff', fontSize: 26, fontWeight: '800' },
   count: { color: 'rgba(255,255,255,0.7)', fontSize: 17, marginTop: 4, fontWeight: '600' },
   hint: { color: 'rgba(255,255,255,0.7)', fontSize: 13, textAlign: 'center', lineHeight: 19, marginBottom: 18, paddingHorizontal: 8 },
   doneHint: { color: 'rgba(255,255,255,0.85)', fontSize: 14, textAlign: 'center', marginBottom: 18 },
-  btn: { backgroundColor: colors.brand, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 48 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  btn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 48 },
+  btnText: { color: colors.brandDark, fontSize: 16, fontWeight: '700' },
   btnGhost: { borderRadius: 14, paddingVertical: 12, paddingHorizontal: 32, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
   btnGhostText: { color: 'rgba(255,255,255,0.85)', fontSize: 15, fontWeight: '600' },
 })

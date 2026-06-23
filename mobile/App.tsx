@@ -7,7 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { AuthProvider, useAuth } from './src/auth'
 import { Loading } from './src/ui'
-import { colors } from './src/theme'
+import { colors, serif } from './src/theme'
 import AuthScreen from './src/screens/AuthScreen'
 import HomeScreen from './src/screens/HomeScreen'
 import JournalScreen from './src/screens/JournalScreen'
@@ -29,10 +29,11 @@ function Tabs() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.bg },
         headerShadowVisible: false,
-        headerTitleStyle: { color: colors.text },
-        tabBarActiveTintColor: colors.brand,
+        headerTitleStyle: { color: colors.text, fontFamily: serif, fontSize: 18 },
+        tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.faint,
-        tabBarStyle: { borderTopColor: colors.border },
+        tabBarStyle: { backgroundColor: colors.cream, borderTopColor: colors.border },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Головна', tabBarLabel: 'Головна', tabBarIcon: tabIcon('🏠') }} />
@@ -53,7 +54,7 @@ function Root() {
         headerStyle: { backgroundColor: colors.bg },
         headerShadowVisible: false,
         headerTintColor: colors.brand,
-        headerTitleStyle: { color: colors.text },
+        headerTitleStyle: { color: colors.text, fontFamily: serif, fontSize: 18 },
       }}
     >
       <Stack.Screen name="Tabs" component={Tabs} options={{ headerShown: false }} />

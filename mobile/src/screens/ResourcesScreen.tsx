@@ -3,7 +3,7 @@ import { Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View 
 import { useFocusEffect } from '@react-navigation/native'
 import { api } from '../api'
 import { Card, Empty, Loading } from '../ui'
-import { colors } from '../theme'
+import { colors, serif } from '../theme'
 
 export default function ResourcesScreen() {
   const [items, setItems] = useState<any[] | null>(null)
@@ -59,11 +59,11 @@ export default function ResourcesScreen() {
 }
 
 const styles = StyleSheet.create({
-  h1: { fontSize: 22, fontWeight: '800', color: colors.text },
+  h1: { fontSize: 24, fontFamily: serif, color: colors.text },
   sub: { fontSize: 14, color: colors.sub, marginTop: 4 },
   iconBox: { width: 38, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 11 },
   icon: { fontSize: 18 },
   name: { fontSize: 14, fontWeight: '600', color: colors.text },
   meta: { fontSize: 12, color: colors.faint, marginTop: 2 },
-  chevron: { fontSize: 20, color: '#d1d5db', marginLeft: 8 },
+  chevron: { fontSize: 20, color: colors.faint, marginLeft: 8 },
 })
