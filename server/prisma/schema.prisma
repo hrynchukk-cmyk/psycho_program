@@ -263,7 +263,19 @@ model Note {
   clientId String?
   client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
 
+  // Голосова нотатка (необовʼязкова). Байти в окремій таблиці, як у щоденнику.
+  audio NoteAudio?
+
   @@index([practitionerId])
+}
+
+// Аудіо-файл голосової нотатки психолога (зберігаємо байти в БД, як JournalAudio).
+model NoteAudio {
+  noteId      String @id
+  note        Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  data        Bytes
+  mime        String
+  durationSec Int?
 }
 
 model JournalEntry {

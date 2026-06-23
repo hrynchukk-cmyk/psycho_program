@@ -98,6 +98,8 @@ export interface Note {
   body: string
   clientId: string | null
   createdAt: string
+  // Метадані голосової нотатки (самі байти тягнуться окремо за токеном).
+  audio?: { mime: string; durationSec?: number } | null
 }
 
 export type DeliveryStatus = 'sent' | 'inProgress' | 'completed'

@@ -15,12 +15,15 @@ async function ownedNote(req: Request) {
   return note
 }
 
+// Метадані аудіо без важких байтів.
+const audioMeta = { audio: { select: { mime: true, durationSec: true } } } as const
+
 notesRouter.get(
   '/',
   asyncHandler(async (req, res) => {
     const where: { practitionerId: string; clientId?: string } = { practitionerId: practitionerId(req) }
     if (typeof req.query.clientId === 'string') where.clientId = req.query.clientId
-    const notes = await prisma.note.findMany({ where, orderBy: { createdAt: 'desc' } })
+    const notes = await prisma.note.findMany({ where, orderBy: { createdAt: 'desc' }, include: audioMeta })
     res.json(notes)
   }),
 )
@@ -29,6 +32,10 @@ const createSchema = z.object({
   title: z.string().min(1),
   body: z.string().default(''),
   clientId: z.string().nullish(),
+  // Голосова нотатка (необовʼязкова): аудіо в base64 + MIME-тип.
+  audioBase64: z.string().optional(),
+  audioMime: z.string().optional(),
+  audioDurationSec: z.number().int().nonnegative().optional(),
 })
 
 notesRouter.post(
@@ -43,7 +50,33 @@ notesRouter.post(
         practitionerId: practitionerId(req),
       },
     })
-    res.status(201).json(note)
+
+    if (data.audioBase64 && data.audioMime) {
+      await prisma.noteAudio.create({
+        data: {
+          noteId: note.id,
+          data: Buffer.from(data.audioBase64, 'base64'),
+          mime: data.audioMime,
+          durationSec: data.audioDurationSec,
+        },
+      })
+    }
+
+    const full = await prisma.note.findUnique({ where: { id: note.id }, include: audioMeta })
+    res.status(201).json(full)
+  }),
+)
+
+// GET /api/notes/:id/audio — віддає аудіо-байти голосової нотатки (лише власнику-психологу).
+notesRouter.get(
+  '/:id/audio',
+  asyncHandler(async (req, res) => {
+    await ownedNote(req)
+    const audio = await prisma.noteAudio.findUnique({ where: { noteId: req.params.id } })
+    if (!audio) throw new HttpError(404, 'Аудіо не знайдено')
+    res.setHeader('Content-Type', audio.mime)
+    res.setHeader('Cache-Control', 'private, max-age=86400')
+    res.send(Buffer.from(audio.data))
   }),
 )
 

@@ -84,7 +84,12 @@ interface Store {
   addTask: (t: Omit<Task, 'id' | 'createdAt' | 'done'>) => Promise<void>
   toggleTask: (id: string) => Promise<void>
   deleteTask: (id: string) => Promise<void>
-  addNote: (n: Omit<Note, 'id' | 'createdAt'>) => Promise<void>
+  addNote: (n: {
+    title: string
+    body: string
+    clientId: string | null
+    audio?: { base64: string; mime: string; durationSec: number } | null
+  }) => Promise<void>
   updateNote: (id: string, patch: Partial<Note>) => Promise<void>
   deleteNote: (id: string) => Promise<void>
   sendToClients: (kind: 'activity' | 'program', refId: string, clientIds: string[]) => Promise<void>
@@ -348,7 +353,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
 
     addNote: async (n) => {
-      await api('/api/notes', { method: 'POST', body: { title: n.title, body: n.body, clientId: n.clientId ?? undefined } })
+      const body: Record<string, unknown> = { title: n.title, body: n.body, clientId: n.clientId ?? undefined }
+      if (n.audio) {
+        body.audioBase64 = n.audio.base64
+        body.audioMime = n.audio.mime
+        body.audioDurationSec = n.audio.durationSec
+      }
+      await api('/api/notes', { method: 'POST', body })
       await reloadNotes()
     },
     updateNote: async (id, patch) => {

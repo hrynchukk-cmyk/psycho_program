@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, inputCls } from '../components/ui'
+import { NoteRecorder, NotePlayer, type Recorded } from '../components/VoiceNote'
 import type { Note } from '../types'
 
 export default function NotesPage() {
@@ -10,22 +11,24 @@ export default function NotesPage() {
   const [filter, setFilter] = useState('')
   const [editing, setEditing] = useState<Note | 'new' | null>(null)
   const [form, setForm] = useState({ title: '', body: '', clientId: '' })
+  const [audio, setAudio] = useState<Recorded | null>(null)
 
   const filtered = filter ? notes.filter((n) => n.clientId === filter) : notes
 
   const openNew = () => {
     setForm({ title: '', body: '', clientId: '' })
+    setAudio(null)
     setEditing('new')
   }
   const openEdit = (n: Note) => {
     setForm({ title: n.title, body: n.body, clientId: n.clientId ?? '' })
+    setAudio(null)
     setEditing(n)
   }
   const save = () => {
     if (!form.title) return
-    const payload = { title: form.title, body: form.body, clientId: form.clientId || null }
-    if (editing === 'new') addNote(payload)
-    else if (editing) updateNote(editing.id, payload)
+    if (editing === 'new') addNote({ title: form.title, body: form.body, clientId: form.clientId || null, audio })
+    else if (editing) updateNote(editing.id, { title: form.title, body: form.body, clientId: form.clientId || null })
     setEditing(null)
   }
 
@@ -85,7 +88,8 @@ export default function NotesPage() {
                     </button>
                   </div>
                 </div>
-                <p className="whitespace-pre-wrap text-sm text-gray-600">{n.body}</p>
+                {n.body && <p className="whitespace-pre-wrap text-sm text-gray-600">{n.body}</p>}
+                {n.audio && <NotePlayer noteId={n.id} durationSec={n.audio.durationSec ?? undefined} />}
               </div>
             )
           })}
@@ -110,6 +114,11 @@ export default function NotesPage() {
           <Field label="Текст">
             <textarea rows={6} className={inputCls} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
           </Field>
+          {editing === 'new' && (
+            <Field label="Голосова нотатка (необов'язково)">
+              <NoteRecorder value={audio} onChange={setAudio} />
+            </Field>
+          )}
           <div className="mt-4 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => setEditing(null)}>
               Скасувати

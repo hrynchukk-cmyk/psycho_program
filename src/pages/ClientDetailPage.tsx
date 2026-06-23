@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Archive, ArchiveRestore, Eye, FileText, Link2, Plus, Upload } from 'lucide-react'
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, Tabs, inputCls } from '../components/ui'
+import { NoteRecorder, NotePlayer, type Recorded } from '../components/VoiceNote'
 import { statusBadge } from './ClientsPage'
 import { EntryCard, moodMeta } from './JournalPage'
 import { BarList, MoodLineChart, StatCard } from '../components/charts'
@@ -27,6 +28,7 @@ export default function ClientDetailPage() {
   const [showShare, setShowShare] = useState(false)
   const [showNote, setShowNote] = useState(false)
   const [noteForm, setNoteForm] = useState({ title: '', body: '' })
+  const [noteAudio, setNoteAudio] = useState<Recorded | null>(null)
 
   if (!client) return <EmptyState title="Клієнта не знайдено" />
 
@@ -54,9 +56,15 @@ export default function ClientDetailPage() {
 
   const addNote = () => {
     if (!noteForm.title) return
-    store.addNote({ ...noteForm, clientId: client.id })
+    store.addNote({ ...noteForm, clientId: client.id, audio: noteAudio })
     setNoteForm({ title: '', body: '' })
+    setNoteAudio(null)
     setShowNote(false)
+  }
+  const openNote = () => {
+    setNoteForm({ title: '', body: '' })
+    setNoteAudio(null)
+    setShowNote(true)
   }
 
   return (
@@ -288,7 +296,7 @@ export default function ClientDetailPage() {
       {tab === 'notes' && (
         <div>
           <div className="mb-4 flex justify-end">
-            <Button onClick={() => setShowNote(true)}>
+            <Button onClick={openNote}>
               <Plus size={15} /> Додати нотатку
             </Button>
           </div>
@@ -302,7 +310,8 @@ export default function ClientDetailPage() {
                     <div className="font-medium text-gray-900">{n.title}</div>
                     <span className="text-xs text-gray-500">{formatDate(n.createdAt)}</span>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm text-gray-600">{n.body}</p>
+                  {n.body && <p className="whitespace-pre-wrap text-sm text-gray-600">{n.body}</p>}
+                  {n.audio && <NotePlayer noteId={n.id} durationSec={n.audio.durationSec ?? undefined} />}
                 </div>
               ))}
             </div>
@@ -360,6 +369,9 @@ export default function ClientDetailPage() {
               value={noteForm.body}
               onChange={(e) => setNoteForm({ ...noteForm, body: e.target.value })}
             />
+          </Field>
+          <Field label="Голосова нотатка (необов'язково)">
+            <NoteRecorder value={noteAudio} onChange={setNoteAudio} />
           </Field>
           <p className="mb-3 text-xs text-gray-500">Нотатки приватні та видимі лише вам.</p>
           <div className="flex justify-end gap-2">
