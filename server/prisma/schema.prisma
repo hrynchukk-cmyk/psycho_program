@@ -265,6 +265,9 @@ model Note {
 
   // Голосова нотатка (необовʼязкова). Байти в окремій таблиці, як у щоденнику.
   audio NoteAudio?
+  // Транскрипція голосової нотатки (Whisper). null | pending | done | failed.
+  transcript       String?
+  transcriptStatus String?
 
   @@index([practitionerId])
 }

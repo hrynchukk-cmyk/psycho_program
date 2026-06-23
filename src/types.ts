@@ -100,6 +100,8 @@ export interface Note {
   createdAt: string
   // Метадані голосової нотатки (самі байти тягнуться окремо за токеном).
   audio?: { mime: string; durationSec?: number } | null
+  transcript?: string
+  transcriptStatus?: 'pending' | 'done' | 'failed' | null
 }
 
 export type DeliveryStatus = 'sent' | 'inProgress' | 'completed'

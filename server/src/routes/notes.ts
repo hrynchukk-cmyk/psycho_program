@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { asyncHandler, HttpError } from '../lib/http.js'
 import { authenticate, practitionerId, requireRole } from '../lib/auth.js'
+import { transcribeNote, transcriptionEnabled } from '../lib/transcribe.js'
 
 export const notesRouter = Router()
 notesRouter.use(authenticate, requireRole('PRACTITIONER'))
@@ -42,24 +43,28 @@ notesRouter.post(
   '/',
   asyncHandler(async (req, res) => {
     const data = createSchema.parse(req.body)
+    const hasAudio = !!(data.audioBase64 && data.audioMime)
     const note = await prisma.note.create({
       data: {
         title: data.title,
         body: data.body,
         clientId: data.clientId ?? undefined,
         practitionerId: practitionerId(req),
+        transcriptStatus: hasAudio && transcriptionEnabled() ? 'pending' : null,
       },
     })
 
-    if (data.audioBase64 && data.audioMime) {
+    if (hasAudio) {
       await prisma.noteAudio.create({
         data: {
           noteId: note.id,
-          data: Buffer.from(data.audioBase64, 'base64'),
-          mime: data.audioMime,
+          data: Buffer.from(data.audioBase64!, 'base64'),
+          mime: data.audioMime!,
           durationSec: data.audioDurationSec,
         },
       })
+      // Транскрипція у фоні — не блокує відповідь.
+      if (transcriptionEnabled()) void transcribeNote(note.id)
     }
 
     const full = await prisma.note.findUnique({ where: { id: note.id }, include: audioMeta })

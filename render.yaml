@@ -34,5 +34,9 @@ services:
       # Render (Environment) — sync: false означає, що його не тримають у репо.
       - key: ANTHROPIC_API_KEY
         sync: false
+      # Ключ OpenAI для транскрипції голосових нотаток і щоденника (Whisper).
+      # Необовʼязковий: без нього аудіо зберігається, але без тексту.
+      - key: OPENAI_API_KEY
+        sync: false
       - key: NODE_VERSION
         value: 22

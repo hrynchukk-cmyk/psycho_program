@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Archive, ArchiveRestore, Eye, FileText, Link2, Plus, Upload } from 'lucide-react'
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, Tabs, inputCls } from '../components/ui'
-import { NoteRecorder, NotePlayer, type Recorded } from '../components/VoiceNote'
+import { NoteRecorder, NotePlayer, NoteTranscript, useTranscriptPolling, type Recorded } from '../components/VoiceNote'
 import { statusBadge } from './ClientsPage'
 import { EntryCard, moodMeta } from './JournalPage'
 import { BarList, MoodLineChart, StatCard } from '../components/charts'
@@ -29,6 +29,11 @@ export default function ClientDetailPage() {
   const [showNote, setShowNote] = useState(false)
   const [noteForm, setNoteForm] = useState({ title: '', body: '' })
   const [noteAudio, setNoteAudio] = useState<Recorded | null>(null)
+  // Поки є нотатки з незавершеною транскрипцією — періодично оновлюємо список.
+  useTranscriptPolling(
+    notes.some((n) => n.clientId === id && n.transcriptStatus === 'pending'),
+    store.refreshNotes,
+  )
 
   if (!client) return <EmptyState title="Клієнта не знайдено" />
 
@@ -312,6 +317,9 @@ export default function ClientDetailPage() {
                   </div>
                   {n.body && <p className="whitespace-pre-wrap text-sm text-gray-600">{n.body}</p>}
                   {n.audio && <NotePlayer noteId={n.id} durationSec={n.audio.durationSec ?? undefined} />}
+                  {(n.transcript || n.transcriptStatus) && (
+                    <NoteTranscript status={n.transcriptStatus} text={n.transcript} />
+                  )}
                 </div>
               ))}
             </div>

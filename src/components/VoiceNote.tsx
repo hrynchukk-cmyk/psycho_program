@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Mic, Square, Trash2 } from 'lucide-react'
+import { Mic, Square, Trash2, FileText, Loader2 } from 'lucide-react'
 import { fetchObjectUrl } from '../api/client'
 
 export interface Recorded {
@@ -151,6 +151,43 @@ export function NoteRecorder({ value, onChange }: { value: Recorded | null; onCh
       <Mic size={15} className="text-red-500" /> Записати голосову нотатку
     </button>
   )
+}
+
+// Текстова транскрипція голосової нотатки (Whisper). Показує стан, поки готується.
+export function NoteTranscript({ status, text }: { status?: string | null; text?: string }) {
+  if (!status && !text) return null
+  return (
+    <div className="mt-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5">
+      <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        <FileText size={12} /> Транскрипція
+      </div>
+      {status === 'pending' && !text ? (
+        <p className="flex items-center gap-1.5 text-xs italic text-gray-400">
+          <Loader2 size={12} className="animate-spin" /> Розшифровуємо аудіо…
+        </p>
+      ) : status === 'failed' && !text ? (
+        <p className="text-xs text-gray-400">Транскрипцію не виконано.</p>
+      ) : (
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">{text}</p>
+      )}
+    </div>
+  )
+}
+
+// Поки серед нотаток є хоч одна «pending» транскрипція — періодично оновлюємо список.
+export function useTranscriptPolling(hasPending: boolean, refresh: () => void) {
+  const ref = useRef(refresh)
+  ref.current = refresh
+  useEffect(() => {
+    if (!hasPending) return
+    let tries = 0
+    const id = window.setInterval(() => {
+      tries += 1
+      ref.current()
+      if (tries >= 15) window.clearInterval(id)
+    }, 4000)
+    return () => window.clearInterval(id)
+  }, [hasPending])
 }
 
 // Програвач голосової нотатки: тягне аудіо з токеном і віддає <audio>.

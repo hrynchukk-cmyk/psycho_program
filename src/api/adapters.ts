@@ -138,6 +138,8 @@ export const adaptNote = (n: any): Note => ({
   clientId: n.clientId ?? null,
   createdAt: n.createdAt,
   audio: n.audio ?? null,
+  transcript: n.transcript ?? undefined,
+  transcriptStatus: n.transcriptStatus ?? null,
 })
 
 export const adaptJournal = (j: any): JournalEntry => ({

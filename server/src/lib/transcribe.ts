@@ -12,34 +12,55 @@ const extFor = (mime: string) => {
   return 'mp3'
 }
 
-// Розшифровує аудіо запису через OpenAI Whisper. Запускається у фоні (без await).
+// Один виклик OpenAI Whisper для байтів аудіо. Повертає розпізнаний текст.
+async function whisper(data: Uint8Array, mime: string): Promise<string> {
+  const form = new FormData()
+  const blob = new Blob([data], { type: mime })
+  form.append('file', blob, `audio.${extFor(mime)}`)
+  form.append('model', 'whisper-1')
+  form.append('language', 'uk')
+
+  const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${OPENAI_KEY}` },
+    body: form,
+  })
+  if (!res.ok) throw new Error(`Whisper ${res.status}: ${await res.text()}`)
+  const json = (await res.json()) as { text: string }
+  return json.text?.trim() || ''
+}
+
+// Розшифровує аудіо запису щоденника. Запускається у фоні (без await).
 // Без OPENAI_API_KEY транскрипція пропускається — лишається тільки аудіо.
 export async function transcribeEntry(entryId: string): Promise<void> {
   if (!OPENAI_KEY) return
   try {
     const audio = await prisma.journalAudio.findUnique({ where: { entryId } })
     if (!audio) throw new Error('no audio')
-
-    const form = new FormData()
-    const blob = new Blob([new Uint8Array(audio.data)], { type: audio.mime })
-    form.append('file', blob, `audio.${extFor(audio.mime)}`)
-    form.append('model', 'whisper-1')
-    form.append('language', 'uk')
-
-    const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${OPENAI_KEY}` },
-      body: form,
-    })
-    if (!res.ok) throw new Error(`Whisper ${res.status}: ${await res.text()}`)
-    const data = (await res.json()) as { text: string }
-
+    const text = await whisper(audio.data, audio.mime)
     await prisma.journalEntry.update({
       where: { id: entryId },
-      data: { transcript: data.text?.trim() || '', transcriptStatus: 'done' },
+      data: { transcript: text, transcriptStatus: 'done' },
     })
   } catch (e) {
-    console.error('Транскрипція не вдалася:', e)
+    console.error('Транскрипція запису не вдалася:', e)
     await prisma.journalEntry.update({ where: { id: entryId }, data: { transcriptStatus: 'failed' } }).catch(() => {})
+  }
+}
+
+// Розшифровує голосову нотатку психолога. Запускається у фоні (без await).
+export async function transcribeNote(noteId: string): Promise<void> {
+  if (!OPENAI_KEY) return
+  try {
+    const audio = await prisma.noteAudio.findUnique({ where: { noteId } })
+    if (!audio) throw new Error('no audio')
+    const text = await whisper(audio.data, audio.mime)
+    await prisma.note.update({
+      where: { id: noteId },
+      data: { transcript: text, transcriptStatus: 'done' },
+    })
+  } catch (e) {
+    console.error('Транскрипція нотатки не вдалася:', e)
+    await prisma.note.update({ where: { id: noteId }, data: { transcriptStatus: 'failed' } }).catch(() => {})
   }
 }

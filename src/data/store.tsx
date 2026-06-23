@@ -92,6 +92,7 @@ interface Store {
   }) => Promise<void>
   updateNote: (id: string, patch: Partial<Note>) => Promise<void>
   deleteNote: (id: string) => Promise<void>
+  refreshNotes: () => Promise<void>
   sendToClients: (kind: 'activity' | 'program', refId: string, clientIds: string[]) => Promise<void>
   addComment: (deliveryId: string, elementId: string | null, text: string) => Promise<void>
   reopenDelivery: (id: string) => Promise<void>
@@ -370,6 +371,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       await api(`/api/notes/${id}`, { method: 'DELETE' })
       setNotes((xs) => xs.filter((x) => x.id !== id))
     },
+    refreshNotes: reloadNotes,
 
     sendToClients: async (kind, refId, clientIds) => {
       await api('/api/deliveries', { method: 'POST', body: { kind: kind.toUpperCase(), refId, clientIds } })

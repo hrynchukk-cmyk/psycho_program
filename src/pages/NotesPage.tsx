@@ -3,17 +3,21 @@ import { Link } from 'react-router-dom'
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, inputCls } from '../components/ui'
-import { NoteRecorder, NotePlayer, type Recorded } from '../components/VoiceNote'
+import { NoteRecorder, NotePlayer, NoteTranscript, useTranscriptPolling, type Recorded } from '../components/VoiceNote'
 import type { Note } from '../types'
 
 export default function NotesPage() {
-  const { notes, clients, addNote, updateNote, deleteNote } = useStore()
+  const { notes, clients, addNote, updateNote, deleteNote, refreshNotes } = useStore()
   const [filter, setFilter] = useState('')
   const [editing, setEditing] = useState<Note | 'new' | null>(null)
   const [form, setForm] = useState({ title: '', body: '', clientId: '' })
   const [audio, setAudio] = useState<Recorded | null>(null)
 
   const filtered = filter ? notes.filter((n) => n.clientId === filter) : notes
+  useTranscriptPolling(
+    filtered.some((n) => n.transcriptStatus === 'pending'),
+    refreshNotes,
+  )
 
   const openNew = () => {
     setForm({ title: '', body: '', clientId: '' })
@@ -90,6 +94,9 @@ export default function NotesPage() {
                 </div>
                 {n.body && <p className="whitespace-pre-wrap text-sm text-gray-600">{n.body}</p>}
                 {n.audio && <NotePlayer noteId={n.id} durationSec={n.audio.durationSec ?? undefined} />}
+                {(n.transcript || n.transcriptStatus) && (
+                  <NoteTranscript status={n.transcriptStatus} text={n.transcript} />
+                )}
               </div>
             )
           })}
