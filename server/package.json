@@ -20,6 +20,7 @@
     "start:prod": "prisma migrate deploy && npm run db:seed:safe && node dist/index.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

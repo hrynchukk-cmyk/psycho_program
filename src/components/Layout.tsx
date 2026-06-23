@@ -10,6 +10,7 @@ import {
   StickyNote,
   BookOpen,
   HeartPulse,
+  Sparkles,
   LogOut,
 } from 'lucide-react'
 import { useStore } from '../data/store'
@@ -24,6 +25,7 @@ const nav = [
   { to: '/tasks', label: 'Задачі', icon: CheckSquare },
   { to: '/notes', label: 'Нотатки', icon: StickyNote },
   { to: '/journal', label: 'Щоденник', icon: BookOpen },
+  { to: '/ai', label: 'AI-консультант', icon: Sparkles },
 ]
 
 export default function Layout() {

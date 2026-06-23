@@ -19,6 +19,7 @@ import ResourcesPage from './pages/ResourcesPage'
 import TasksPage from './pages/TasksPage'
 import NotesPage from './pages/NotesPage'
 import JournalPage from './pages/JournalPage'
+import AiConsultPage from './pages/AiConsultPage'
 
 const router = createHashRouter([
   {
@@ -39,6 +40,7 @@ const router = createHashRouter([
       { path: '/tasks', element: <TasksPage /> },
       { path: '/notes', element: <NotesPage /> },
       { path: '/journal', element: <JournalPage /> },
+      { path: '/ai', element: <AiConsultPage /> },
     ],
   },
 ])

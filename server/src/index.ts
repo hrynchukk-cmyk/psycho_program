@@ -14,6 +14,7 @@ import { notesRouter } from './routes/notes.js'
 import { journalRouter } from './routes/journal.js'
 import { deliveriesRouter } from './routes/deliveries.js'
 import { clientRouter } from './routes/client.js'
+import { aiRouter } from './routes/ai.js'
 
 const app = express()
 
@@ -56,6 +57,7 @@ app.use('/api/notes', notesRouter)
 app.use('/api/journal', journalRouter)
 app.use('/api/deliveries', deliveriesRouter)
 app.use('/api/client', clientRouter)
+app.use('/api/ai', aiRouter)
 
 app.use((_req, res) => res.status(404).json({ error: 'Маршрут не знайдено' }))
 app.use(errorHandler)

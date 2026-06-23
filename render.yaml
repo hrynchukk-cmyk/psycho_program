@@ -30,5 +30,9 @@ services:
       # напр.: https://psycho-program.vercel.app,https://psychoprogram.com
       - key: CORS_ORIGINS
         value: "*"
+      # Ключ Anthropic для AI-консультанта. Значення задайте вручну в дашборді
+      # Render (Environment) — sync: false означає, що його не тримають у репо.
+      - key: ANTHROPIC_API_KEY
+        sync: false
       - key: NODE_VERSION
         value: 22
