@@ -5,6 +5,7 @@ import { prisma } from '../lib/prisma.js'
 import { asyncHandler, HttpError } from '../lib/http.js'
 import { authenticate, practitionerId } from '../lib/auth.js'
 import { transcribeEntry, transcriptionEnabled } from '../lib/transcribe.js'
+import { notifyClient } from '../lib/push.js'
 
 export const journalRouter = Router()
 journalRouter.use(authenticate)
@@ -164,6 +165,16 @@ journalRouter.patch(
       },
       include: audioMeta,
     })
+
+    // Пуш клієнту про відповідь психолога (fire-and-forget).
+    if (data.reply !== undefined && data.reply.trim()) {
+      void notifyClient(entry.clientId, {
+        title: 'Нова відповідь психолога',
+        body: data.reply.slice(0, 140),
+        data: { screen: 'Journal' },
+      })
+    }
+
     res.json(updated)
   }),
 )

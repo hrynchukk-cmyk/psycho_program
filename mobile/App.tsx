@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Text } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import { NavigationContainer } from '@react-navigation/native'
+import { navRef } from './src/navRef'
+import { initNotificationRouting, registerPushToken } from './src/notifications'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -46,6 +48,10 @@ function Tabs() {
 
 function Root() {
   const { ready, user } = useAuth()
+  // Коли клієнт увійшов — реєструємо пристрій для пуш-сповіщень.
+  useEffect(() => {
+    if (user) registerPushToken()
+  }, [user])
   if (!ready) return <Loading />
   if (!user) return <AuthScreen />
   return (
@@ -65,10 +71,13 @@ function Root() {
 }
 
 export default function App() {
+  useEffect(() => {
+    initNotificationRouting()
+  }, [])
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <NavigationContainer>
+        <NavigationContainer ref={navRef}>
           <Root />
         </NavigationContainer>
         <StatusBar style="dark" />

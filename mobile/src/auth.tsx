@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { api, ApiError, tokenStore } from './api'
+import { clearPushToken } from './notifications'
 
 export interface ClientProfile {
   id: string
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
+    await clearPushToken() // прибрати токен на сервері (поки ще авторизовані)
     await tokenStore.clear()
     setUser(null)
   }

@@ -109,6 +109,9 @@ model Client {
   userId String? @unique
   user   User?   @relation("ClientUser", fields: [userId], references: [id], onDelete: SetNull)
 
+  // Expo push-токен пристрою клієнта для сповіщень (null, поки не зареєстровано).
+  expoPushToken String?
+
   memberships    GroupMember[]
   journalEntries JournalEntry[]
   tasks          Task[]

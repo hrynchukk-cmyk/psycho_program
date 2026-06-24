@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma.js'
 import { asyncHandler, HttpError } from '../lib/http.js'
 import { authenticate, practitionerId, requireRole } from '../lib/auth.js'
+import { notifyClient } from '../lib/push.js'
 
 export const deliveriesRouter = Router()
 deliveriesRouter.use(authenticate, requireRole('PRACTITIONER'))
@@ -62,6 +63,18 @@ deliveriesRouter.post(
     await prisma.delivery.createMany({
       data: owned.map((c) => ({ kind: data.kind, refId: data.refId, clientId: c.id })),
     })
+
+    // Пуш-сповіщення клієнтам про нове завдання (fire-and-forget).
+    const isActivity = data.kind === 'ACTIVITY'
+    const ref = isActivity
+      ? await prisma.activity.findUnique({ where: { id: data.refId }, select: { title: true } })
+      : await prisma.program.findUnique({ where: { id: data.refId }, select: { title: true } })
+    const title = isActivity ? 'Нова активність' : 'Нова програма'
+    const body = ref?.title
+      ? `Психолог надіслав вам: «${ref.title}»`
+      : 'Психолог надіслав вам нове завдання.'
+    for (const c of owned) void notifyClient(c.id, { title, body, data: { screen: 'Home' } })
+
     res.status(201).json({ ok: true, sent: owned.length })
   }),
 )
@@ -97,6 +110,11 @@ deliveriesRouter.post(
         author: 'PRACTITIONER',
         text: data.text,
       },
+    })
+    void notifyClient(delivery.clientId, {
+      title: 'Новий коментар психолога',
+      body: data.text.slice(0, 140),
+      data: { screen: 'Home' },
     })
     res.status(201).json(comment)
   }),

@@ -232,3 +232,23 @@ clientRouter.get(
     )
   }),
 )
+
+// Реєстрація Expo push-токена пристрою клієнта (для сповіщень).
+const pushTokenSchema = z.object({ token: z.string().min(1) })
+clientRouter.post(
+  '/push-token',
+  asyncHandler(async (req, res) => {
+    const { token } = pushTokenSchema.parse(req.body)
+    await prisma.client.update({ where: { id: myClientId(req) }, data: { expoPushToken: token } })
+    res.json({ ok: true })
+  }),
+)
+
+// Видалити токен (при виході з акаунта).
+clientRouter.delete(
+  '/push-token',
+  asyncHandler(async (req, res) => {
+    await prisma.client.update({ where: { id: myClientId(req) }, data: { expoPushToken: null } })
+    res.json({ ok: true })
+  }),
+)

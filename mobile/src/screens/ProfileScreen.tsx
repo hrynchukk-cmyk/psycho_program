@@ -1,9 +1,73 @@
-import React from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { useAuth } from '../auth'
 import { Card } from '../ui'
 import { Avatar } from '../components/Logo'
 import { colors, serif } from '../theme'
+import { getReminderPref, setJournalReminder, type ReminderPref } from '../notifications'
+
+const TIME_PRESETS = [
+  { hour: 9, minute: 0, label: '09:00' },
+  { hour: 13, minute: 0, label: '13:00' },
+  { hour: 18, minute: 0, label: '18:00' },
+  { hour: 20, minute: 0, label: '20:00' },
+  { hour: 21, minute: 0, label: '21:00' },
+]
+
+function NotificationsCard() {
+  const [pref, setPref] = useState<ReminderPref>({ enabled: false, hour: 20, minute: 0 })
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    getReminderPref().then(setPref)
+  }, [])
+
+  const apply = async (next: ReminderPref) => {
+    setBusy(true)
+    const prev = pref
+    setPref(next)
+    const ok = await setJournalReminder(next)
+    if (!ok && next.enabled) {
+      setPref(prev)
+      Alert.alert('Потрібен дозвіл', 'Дозвольте сповіщення в налаштуваннях телефону, щоб отримувати нагадування.')
+    }
+    setBusy(false)
+  }
+
+  return (
+    <Card style={{ marginTop: 12 }}>
+      <View style={styles.notifHead}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.notifTitle}>🔔 Нагадування про щоденник</Text>
+          <Text style={styles.notifSub}>Щоденне сповіщення, щоб не забути зробити запис</Text>
+        </View>
+        <Switch
+          value={pref.enabled}
+          disabled={busy}
+          onValueChange={(v) => apply({ ...pref, enabled: v })}
+          trackColor={{ true: colors.gold }}
+          thumbColor="#fff"
+        />
+      </View>
+      {pref.enabled && (
+        <View style={styles.timeRow}>
+          {TIME_PRESETS.map((t) => {
+            const sel = pref.hour === t.hour && pref.minute === t.minute
+            return (
+              <Pressable
+                key={t.label}
+                onPress={() => apply({ ...pref, hour: t.hour, minute: t.minute })}
+                style={[styles.timeChip, sel && styles.timeChipSel]}
+              >
+                <Text style={[styles.timeChipText, sel && { color: colors.brandDark, fontWeight: '800' }]}>{t.label}</Text>
+              </Pressable>
+            )
+          })}
+        </View>
+      )}
+    </Card>
+  )
+}
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth()
@@ -32,6 +96,9 @@ export default function ProfileScreen() {
           </View>
         </Card>
       ) : null}
+
+      {/* Сповіщення */}
+      <NotificationsCard />
 
       {/* Вихід */}
       <Card style={{ marginTop: 12, padding: 0 }}>
@@ -64,4 +131,11 @@ const styles = StyleSheet.create({
   logoutText: { fontSize: 14, fontWeight: '600', color: colors.danger },
   chevron: { fontSize: 20, color: colors.faint },
   version: { textAlign: 'center', color: colors.faint, fontSize: 12, marginTop: 24 },
+  notifHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  notifTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+  notifSub: { fontSize: 12, color: colors.sub, marginTop: 2, lineHeight: 16 },
+  timeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  timeChip: { borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, paddingVertical: 7, paddingHorizontal: 14, backgroundColor: colors.inputBg },
+  timeChipSel: { borderColor: colors.gold, backgroundColor: colors.goldSoft },
+  timeChipText: { fontSize: 13, fontWeight: '600', color: colors.text2 },
 })
