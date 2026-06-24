@@ -48,8 +48,8 @@ export default function NotesPage() {
         }
       />
 
-      <div className="mb-4 flex items-center gap-3">
-        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`${inputCls} w-64`}>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`${inputCls} w-full sm:w-64`}>
           <option value="">Усі нотатки</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>

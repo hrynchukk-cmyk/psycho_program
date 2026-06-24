@@ -79,7 +79,8 @@ export default function DashboardPage() {
         {activeClients.length === 0 ? (
           <EmptyState title="Немає активних клієнтів" />
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
                 <th className="px-5 py-2.5 font-medium">Клієнт</th>
@@ -132,6 +133,7 @@ export default function DashboardPage() {
                 })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

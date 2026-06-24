@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -11,6 +12,8 @@ import {
   BookOpen,
   HeartPulse,
   Sparkles,
+  Menu,
+  X,
   LogOut,
 } from 'lucide-react'
 import { useStore } from '../data/store'
@@ -30,24 +33,57 @@ const nav = [
 
 export default function Layout() {
   const { user, logout } = useStore()
+  const [open, setOpen] = useState(false)
   const initials = user ? `${user.firstName[0] ?? ''}${user.lastName[0] ?? ''}` : 'ДП'
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <aside className="fixed inset-y-0 left-0 flex w-60 flex-col border-r border-gray-200 bg-white">
+    <div className="min-h-screen bg-gray-50">
+      {/* Верхня панель — лише на мобільних */}
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100"
+          aria-label="Відкрити меню"
+        >
+          <Menu size={22} />
+        </button>
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+          <HeartPulse size={18} />
+        </span>
+        <span className="text-sm font-bold text-gray-900">Psycho Program</span>
+      </header>
+
+      {/* Затемнення під висувним меню (мобільні) */}
+      {open && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setOpen(false)} />}
+
+      {/* Бічне меню: статичне на десктопі, висувне на мобільних */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 max-w-[82%] flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:w-60 md:translate-x-0 ${
+          open ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="flex items-center gap-2.5 border-b border-gray-200 px-5 py-4">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white">
             <HeartPulse size={20} />
           </span>
-          <div>
+          <div className="min-w-0 flex-1">
             <div className="text-sm font-bold text-gray-900">Psycho Program</div>
             <div className="text-xs text-gray-500">Адмін-панель</div>
           </div>
+          <button
+            onClick={() => setOpen(false)}
+            className="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 md:hidden"
+            aria-label="Закрити меню"
+          >
+            <X size={18} />
+          </button>
         </div>
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
+              onClick={() => setOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -79,8 +115,10 @@ export default function Layout() {
           </button>
         </div>
       </aside>
-      <main className="ml-60 flex-1 px-8 py-8">
-        <div className="mx-auto max-w-6xl">
+
+      {/* Контент */}
+      <main className="md:ml-60">
+        <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
           <Outlet />
         </div>
       </main>

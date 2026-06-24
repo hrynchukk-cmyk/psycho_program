@@ -50,8 +50,8 @@ export default function ResourcesPage() {
       {resources.length === 0 ? (
         <EmptyState title="Ресурсів ще немає" hint="Завантажте файл або додайте посилання." />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full min-w-[560px] text-left text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
                 <th className="px-5 py-3 font-medium">Назва</th>

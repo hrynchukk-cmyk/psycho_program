@@ -111,7 +111,7 @@ export default function AiConsultPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col">
+    <div className="flex h-[calc(100vh-8rem)] flex-col md:h-[calc(100vh-4rem)]">
       <PageHeader
         title="AI-консультант"
         subtitle="Доказові матеріали КПТ із посиланнями на довірені джерела"

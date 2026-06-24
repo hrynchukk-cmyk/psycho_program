@@ -67,8 +67,8 @@ export default function ClientsPage() {
       {filtered.length === 0 ? (
         <EmptyState title="Клієнтів не знайдено" hint="Спробуйте змінити фільтри або додайте нового клієнта." />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
                 <th className="px-5 py-3 font-medium">Клієнт</th>
