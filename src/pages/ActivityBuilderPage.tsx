@@ -271,6 +271,23 @@ export default function ActivityBuilderPage() {
                       </button>
                     </div>
                   )}
+                  {(el.type === 'video' || el.type === 'image') && (
+                    <div className="mt-2">
+                      <input
+                        className={`${inputCls} py-1.5`}
+                        placeholder={
+                          el.type === 'video'
+                            ? 'Посилання на відео/аудіо (YouTube, Vimeo, mp3…)'
+                            : 'Посилання на зображення'
+                        }
+                        value={el.options?.[0] ?? ''}
+                        onChange={(e) => updateEl(i, { options: [e.target.value] })}
+                      />
+                      <p className="mt-1 text-xs text-gray-400">
+                        Клієнт відкриє це посилання, натиснувши на блок у застосунку.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )
             })}

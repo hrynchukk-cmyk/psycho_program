@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { api } from '../api'
 import { Button, Card, Loading } from '../ui'
 import BreathingExercise from '../components/BreathingExercise'
@@ -66,10 +66,34 @@ export default function ActivityScreen({ route, navigation }: any) {
           ) : el.type === 'text' ? (
             <Text style={styles.info}>{el.title}</Text>
           ) : el.type === 'video' || el.type === 'image' ? (
-            <View style={styles.media}>
-              <Text style={styles.mediaIcon}>{el.type === 'video' ? '🎬' : '🖼️'}</Text>
-              <Text style={styles.mediaText}>{el.title}</Text>
-            </View>
+            (() => {
+              const url = (el.options ?? []).find((o: string) => o && o.trim())
+              const inner = (
+                <>
+                  <Text style={styles.mediaIcon}>{el.type === 'video' ? '🎬' : '🖼️'}</Text>
+                  <Text style={styles.mediaText}>{el.title}</Text>
+                  {url ? (
+                    <View style={styles.mediaBtn}>
+                      <Text style={styles.mediaBtnText}>{el.type === 'video' ? '▶  Відкрити' : 'Переглянути'}</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.mediaHint}>Матеріал ще не додано</Text>
+                  )}
+                </>
+              )
+              return url ? (
+                <Pressable
+                  style={styles.media}
+                  onPress={() =>
+                    Linking.openURL(url).catch(() => Alert.alert('Не вдалося відкрити', 'Перевірте посилання або зʼєднання.'))
+                  }
+                >
+                  {inner}
+                </Pressable>
+              ) : (
+                <View style={styles.media}>{inner}</View>
+              )
+            })()
           ) : el.type === 'breathing' ? (
             <Pressable
               style={styles.breath}
@@ -213,6 +237,9 @@ const styles = StyleSheet.create({
   media: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 16, alignItems: 'center' },
   mediaIcon: { fontSize: 28 },
   mediaText: { fontSize: 13, color: colors.sub, marginTop: 6, textAlign: 'center' },
+  mediaBtn: { backgroundColor: colors.brandDark, borderRadius: 10, paddingVertical: 9, paddingHorizontal: 24, marginTop: 12 },
+  mediaBtnText: { color: colors.goldText, fontSize: 13, fontWeight: '700' },
+  mediaHint: { fontSize: 12, color: colors.faint, marginTop: 8, fontStyle: 'italic' },
   breath: { backgroundColor: colors.brandSoft, borderWidth: 1, borderColor: colors.brandSoftBorder, borderRadius: 14, padding: 18, alignItems: 'center' },
   breathIcon: { fontSize: 34 },
   breathTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: 8, textAlign: 'center' },

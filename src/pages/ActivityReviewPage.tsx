@@ -171,6 +171,21 @@ export default function ActivityReviewPage() {
                 {el.type === 'cards' && (
                   <p className="mt-1 text-xs text-gray-400">🃏 Колода карток ({el.options?.length ?? 0}) — клієнт гортає у застосунку</p>
                 )}
+                {(el.type === 'video' || el.type === 'image') &&
+                  (el.options?.[0]?.trim() ? (
+                    <a
+                      href={el.options[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-1 text-xs text-brand-600 hover:underline"
+                    >
+                      {el.type === 'video' ? '🎬' : '🖼️'} Відкрити матеріал
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-400">
+                      {el.type === 'video' ? '🎬' : '🖼️'} Матеріал без посилання
+                    </p>
+                  ))}
                 {isQuestion && (
                   <div className="mt-2 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-800">
                     {answer ?? <span className="text-gray-400">Без відповіді</span>}
