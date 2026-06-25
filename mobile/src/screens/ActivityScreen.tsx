@@ -188,13 +188,41 @@ export default function ActivityScreen({ route, navigation }: any) {
             {result ? (
               <View style={styles.sheet}>
                 <Text style={styles.resKicker}>Результат · {result.def.short}</Text>
-                <View style={[styles.scoreCircle, { borderColor: result.band.color }]}>
-                  <Text style={[styles.scoreNum, { color: result.band.color }]}>{result.total}</Text>
-                  <Text style={styles.scoreMax}>з {result.max}</Text>
-                </View>
-                <Text style={[styles.bandLabel, { color: result.band.color }]}>
-                  {result.def.name.split('—')[0].trim()}: {result.band.label}
-                </Text>
+
+                {result.subscales.length > 0 ? (
+                  // Субшкали (напр. DASS-21).
+                  <View style={{ alignSelf: 'stretch', marginTop: 8 }}>
+                    {result.subscales.map((s) => (
+                      <View key={s.key} style={{ marginBottom: 12 }}>
+                        <View style={styles.subRow}>
+                          <Text style={styles.subName}>{s.name}</Text>
+                          <Text style={[styles.subVal, { color: s.band?.color ?? colors.sub }]}>
+                            {s.total} · {s.band?.label}
+                          </Text>
+                        </View>
+                        <View style={styles.subTrack}>
+                          <View
+                            style={[
+                              styles.subFill,
+                              { width: `${s.max ? Math.round((s.total / s.max) * 100) : 0}%`, backgroundColor: s.band?.color ?? colors.sub },
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <>
+                    <View style={[styles.scoreCircle, { borderColor: result.band?.color ?? colors.sub }]}>
+                      <Text style={[styles.scoreNum, { color: result.band?.color ?? colors.sub }]}>{result.total}</Text>
+                      <Text style={styles.scoreMax}>з {result.max}</Text>
+                    </View>
+                    <Text style={[styles.bandLabel, { color: result.band?.color ?? colors.sub }]}>
+                      {result.def.name.split('—')[0].trim()}: {result.band?.label ?? '—'}
+                    </Text>
+                  </>
+                )}
+
                 <Text style={styles.disclaimer}>{DISCLAIMER}</Text>
 
                 {result.critical ? (
@@ -271,6 +299,11 @@ const styles = StyleSheet.create({
   scoreNum: { fontSize: 40, fontWeight: '800' },
   scoreMax: { fontSize: 12, color: colors.sub, marginTop: -2 },
   bandLabel: { fontSize: 17, fontWeight: '800', textAlign: 'center' },
+  subRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 },
+  subName: { fontSize: 14, fontWeight: '600', color: colors.text },
+  subVal: { fontSize: 13, fontWeight: '700' },
+  subTrack: { height: 8, borderRadius: 4, backgroundColor: colors.brandSoft, overflow: 'hidden' },
+  subFill: { height: '100%', borderRadius: 4 },
   disclaimer: { fontSize: 13, color: colors.sub, textAlign: 'center', marginTop: 10, lineHeight: 19 },
   crisis: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 14, marginTop: 16, alignSelf: 'stretch' },
   crisisTitle: { fontSize: 15, fontWeight: '800', color: '#b91c1c' },

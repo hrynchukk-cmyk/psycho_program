@@ -11,29 +11,63 @@ import { AlertTriangle } from 'lucide-react'
 function AssessmentSummary({ activity, delivery }: { activity: Activity; delivery: Delivery }) {
   const result = scoreAssessment(activity.assessmentKey, activity.elements, delivery.responses ?? [])
   if (!result) return null
-  const pct = Math.round((result.total / result.max) * 100)
+  const { def, band } = result
+  const accent = band?.color ?? '#6b7280'
+  const pct = result.max ? Math.round((result.total / result.max) * 100) : 0
   return (
     <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <div className="flex flex-wrap items-center gap-5 p-5">
-        <div
-          className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-full border-[5px]"
-          style={{ borderColor: result.band.color }}
-        >
-          <span className="text-3xl font-extrabold leading-none" style={{ color: result.band.color }}>
-            {result.total}
-          </span>
-          <span className="text-xs text-gray-400">з {result.max}</span>
+      <div className="p-5">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Результат · {def.short}</div>
+          {def.intervalLabel && <div className="text-xs text-gray-400">Інтервал: {def.intervalLabel}</div>}
         </div>
-        <div className="min-w-[200px] flex-1">
-          <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Результат · {result.def.short}</div>
-          <div className="mt-0.5 text-lg font-bold" style={{ color: result.band.color }}>
-            {result.def.name.split('—')[0].trim()}: {result.band.label}
+
+        {result.subscales.length > 0 ? (
+          // Субшкали (напр. DASS-21): окрема смуга на кожну.
+          <div className="mt-3 space-y-3">
+            {result.subscales.map((s) => (
+              <div key={s.key}>
+                <div className="mb-1 flex items-center justify-between text-sm">
+                  <span className="font-medium text-gray-800">{s.name}</span>
+                  <span className="font-semibold" style={{ color: s.band?.color }}>
+                    {s.total} · {s.band?.label}
+                  </span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${s.max ? Math.round((s.total / s.max) * 100) : 0}%`, backgroundColor: s.band?.color }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
-            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: result.band.color }} />
+        ) : (
+          <div className="mt-3 flex flex-wrap items-center gap-5">
+            <div
+              className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-full border-[5px]"
+              style={{ borderColor: accent }}
+            >
+              <span className="text-3xl font-extrabold leading-none" style={{ color: accent }}>
+                {result.total}
+              </span>
+              <span className="text-xs text-gray-400">з {result.max}</span>
+            </div>
+            <div className="min-w-[200px] flex-1">
+              <div className="text-lg font-bold" style={{ color: accent }}>
+                {def.name.split('—')[0].trim()}: {band?.label ?? '—'}
+              </div>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: accent }} />
+              </div>
+            </div>
           </div>
-          <p className="mt-2 text-xs text-gray-500">{DISCLAIMER}</p>
-        </div>
+        )}
+
+        {def.note && <p className="mt-3 text-xs text-gray-500">{def.note}</p>}
+        <p className="mt-1 text-xs text-gray-400">
+          {DISCLAIMER} · Джерело: {def.source}
+        </p>
       </div>
       {result.critical && (
         <div className="border-t border-red-200 bg-red-50 p-5">

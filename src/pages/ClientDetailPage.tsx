@@ -7,6 +7,7 @@ import { NoteRecorder, NotePlayer, NoteTranscript, useTranscriptPolling, type Re
 import { statusBadge } from './ClientsPage'
 import { EntryCard, moodMeta } from './JournalPage'
 import { BarList, MoodLineChart, StatCard } from '../components/charts'
+import AssessmentTrends from '../components/AssessmentTrend'
 import { avgMood, clientEngagement, moodDistribution, moodSeries, prePostInsights, topTags } from '../lib/stats'
 import type { DeliveryStatus } from '../types'
 
@@ -136,6 +137,8 @@ export default function ClientDetailPage() {
                   <p className="text-sm text-gray-400">Замало записів для графіка — потрібно щонайменше два.</p>
                 )}
               </div>
+
+              <AssessmentTrends deliveries={deliveries} activities={activities} clientId={client.id} />
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="rounded-xl border border-gray-200 bg-white p-5">
