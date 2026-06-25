@@ -89,6 +89,7 @@ model User {
   resources  Resource[]
   tasks      Task[]
   notes      Note[]
+  appointments Appointment[]
 
   // Якщо цей користувач — клієнт, тут його профіль у психолога.
   clientProfile Client? @relation("ClientUser")
@@ -118,6 +119,7 @@ model Client {
   notes          Note[]
   deliveries     Delivery[]
   resourceShares ResourceShare[]
+  appointments   Appointment[]
 
   @@index([practitionerId])
 }
@@ -342,4 +344,30 @@ model ThreadComment {
   createdAt  DateTime      @default(now())
 
   @@index([deliveryId])
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+// Запис на прийом (відвідування) у календарі психолога.
+model Appointment {
+  id          String            @id @default(cuid())
+  startAt     DateTime
+  durationMin Int               @default(50)
+  status      AppointmentStatus @default(SCHEDULED)
+  note        String?
+  createdAt   DateTime          @default(now())
+
+  practitionerId String
+  practitioner   User   @relation(fields: [practitionerId], references: [id], onDelete: Cascade)
+
+  // Клієнт необовʼязковий (можна позначити особистий блок часу).
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([practitionerId, startAt])
 }

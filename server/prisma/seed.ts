@@ -865,6 +865,26 @@ async function main() {
     ],
   })
 
+  // ===================== КАЛЕНДАР ВІДВІДУВАНЬ =====================
+  const at = (dayOffset: number, hour: number, minute = 0) => {
+    const d = new Date()
+    d.setDate(d.getDate() + dayOffset)
+    d.setHours(hour, minute, 0, 0)
+    return d
+  }
+  await prisma.appointment.createMany({
+    data: [
+      { practitionerId: pid, clientId: olena.id, startAt: at(0, 10), durationMin: 50, status: 'SCHEDULED', note: 'Сесія 13 — робота з тривогою' },
+      { practitionerId: pid, clientId: andrii.id, startAt: at(0, 14), durationMin: 50, status: 'SCHEDULED' },
+      { practitionerId: pid, clientId: ihor.id, startAt: at(1, 11), durationMin: 50, status: 'SCHEDULED' },
+      { practitionerId: pid, clientId: maria.id, startAt: at(1, 16), durationMin: 60, status: 'SCHEDULED', note: 'Інтейк' },
+      { practitionerId: pid, clientId: olena.id, startAt: at(3, 10), durationMin: 50, status: 'SCHEDULED' },
+      { practitionerId: pid, clientId: null, startAt: at(2, 9), durationMin: 30, status: 'SCHEDULED', note: 'Підготовка до сесій' },
+      { practitionerId: pid, clientId: andrii.id, startAt: at(-2, 14), durationMin: 50, status: 'COMPLETED' },
+      { practitionerId: pid, clientId: ihor.id, startAt: at(-1, 11), durationMin: 50, status: 'NO_SHOW' },
+    ],
+  })
+
   const counts = {
     activities: await prisma.activity.count(),
     premade: await prisma.activity.count({ where: { isPremade: true } }),

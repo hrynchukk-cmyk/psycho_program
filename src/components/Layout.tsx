@@ -10,6 +10,7 @@ import {
   CheckSquare,
   StickyNote,
   BookOpen,
+  CalendarDays,
   HeartPulse,
   Sparkles,
   Menu,
@@ -28,6 +29,7 @@ const nav = [
   { to: '/tasks', label: 'Задачі', icon: CheckSquare },
   { to: '/notes', label: 'Нотатки', icon: StickyNote },
   { to: '/journal', label: 'Щоденник', icon: BookOpen },
+  { to: '/calendar', label: 'Календар', icon: CalendarDays },
   { to: '/ai', label: 'AI-консультант', icon: Sparkles },
 ]
 

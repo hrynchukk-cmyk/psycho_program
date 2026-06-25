@@ -104,6 +104,19 @@ export interface Note {
   transcriptStatus?: 'pending' | 'done' | 'failed' | null
 }
 
+export type AppointmentStatus = 'scheduled' | 'completed' | 'cancelled' | 'noShow'
+
+// Запис на прийом у календарі психолога.
+export interface Appointment {
+  id: string
+  startAt: string
+  durationMin: number
+  status: AppointmentStatus
+  note?: string
+  clientId: string | null
+  createdAt: string
+}
+
 export type DeliveryStatus = 'sent' | 'inProgress' | 'completed'
 
 export interface Delivery {

@@ -3,6 +3,8 @@
 import type {
   Activity,
   ActivityElement,
+  Appointment,
+  AppointmentStatus,
   Client,
   ClientStatus,
   Delivery,
@@ -156,6 +158,29 @@ export const adaptJournal = (j: any): JournalEntry => ({
   audio: j.audio ?? null,
   transcript: j.transcript ?? undefined,
   transcriptStatus: j.transcriptStatus ?? null,
+})
+
+const APPT_STATUS_FROM_API: Record<string, AppointmentStatus> = {
+  SCHEDULED: 'scheduled',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+  NO_SHOW: 'noShow',
+}
+const APPT_STATUS_TO_API: Record<AppointmentStatus, string> = {
+  scheduled: 'SCHEDULED',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+  noShow: 'NO_SHOW',
+}
+export const toApiApptStatus = (s: AppointmentStatus) => APPT_STATUS_TO_API[s]
+export const adaptAppointment = (a: any): Appointment => ({
+  id: a.id,
+  startAt: a.startAt,
+  durationMin: a.durationMin,
+  status: APPT_STATUS_FROM_API[a.status] ?? 'scheduled',
+  note: a.note ?? undefined,
+  clientId: a.clientId ?? null,
+  createdAt: a.createdAt,
 })
 
 export const adaptComment = (c: any): ThreadComment => ({

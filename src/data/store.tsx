@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type {
   Activity,
+  Appointment,
   Client,
   Delivery,
   Group,
@@ -14,6 +15,7 @@ import type {
 import { api, ApiError, tokenStore } from '../api/client'
 import {
   adaptActivity,
+  adaptAppointment,
   adaptClient,
   adaptComment,
   adaptDelivery,
@@ -23,6 +25,7 @@ import {
   adaptProgram,
   adaptResource,
   adaptTask,
+  toApiApptStatus,
   toApiElementType,
   toApiMode,
   toApiMood,
@@ -61,6 +64,7 @@ interface Store {
   deliveries: Delivery[]
   comments: ThreadComment[]
   journal: JournalEntry[]
+  appointments: Appointment[]
 
   addClient: (c: Omit<Client, 'id' | 'createdAt'>) => Promise<void>
   updateClient: (id: string, patch: Partial<Client>) => Promise<void>
@@ -98,6 +102,9 @@ interface Store {
   reopenDelivery: (id: string) => Promise<void>
   markJournalReviewed: (id: string, reviewed: boolean) => Promise<void>
   replyToJournal: (id: string, reply: string) => Promise<void>
+  addAppointment: (a: { startAt: string; durationMin: number; clientId: string | null; note?: string }) => Promise<void>
+  updateAppointment: (id: string, patch: Partial<Appointment>) => Promise<void>
+  deleteAppointment: (id: string) => Promise<void>
 }
 
 const StoreContext = createContext<Store | null>(null)
@@ -116,6 +123,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [deliveries, setDeliveries] = useState<Delivery[]>([])
   const [comments, setComments] = useState<ThreadComment[]>([])
   const [journal, setJournal] = useState<JournalEntry[]>([])
+  const [appointments, setAppointments] = useState<Appointment[]>([])
 
   // --- завантаження колекцій ---
   const reloadClients = async () => setClients((await api<any[]>('/api/clients')).map(adaptClient))
@@ -126,6 +134,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const reloadTasks = async () => setTasks((await api<any[]>('/api/tasks')).map(adaptTask))
   const reloadNotes = async () => setNotes((await api<any[]>('/api/notes')).map(adaptNote))
   const reloadJournal = async () => setJournal((await api<any[]>('/api/journal')).map(adaptJournal))
+  const reloadAppointments = async () =>
+    setAppointments((await api<any[]>('/api/appointments')).map(adaptAppointment))
   const reloadDeliveries = async () => {
     const ds = await api<any[]>('/api/deliveries')
     setDeliveries(ds.map(adaptDelivery))
@@ -143,6 +153,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       reloadNotes(),
       reloadJournal(),
       reloadDeliveries(),
+      reloadAppointments(),
     ])
   }
 
@@ -203,6 +214,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setDeliveries([])
       setComments([])
       setJournal([])
+      setAppointments([])
     },
 
     clients,
@@ -215,6 +227,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     deliveries,
     comments,
     journal,
+    appointments,
 
     addClient: async (c) => {
       await api('/api/clients', { method: 'POST', body: { firstName: c.firstName, lastName: c.lastName, email: c.email } })
@@ -395,6 +408,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     replyToJournal: async (id, reply) => {
       const updated = adaptJournal(await api<any>(`/api/journal/${id}`, { method: 'PATCH', body: { reply } }))
       setJournal((xs) => xs.map((x) => (x.id === id ? updated : x)))
+    },
+    addAppointment: async (a) => {
+      await api('/api/appointments', {
+        method: 'POST',
+        body: { startAt: a.startAt, durationMin: a.durationMin, clientId: a.clientId ?? undefined, note: a.note || undefined },
+      })
+      await reloadAppointments()
+    },
+    updateAppointment: async (id, patch) => {
+      const body: Record<string, unknown> = { ...patch }
+      if (patch.status) body.status = toApiApptStatus(patch.status)
+      if ('clientId' in patch) body.clientId = patch.clientId
+      await api(`/api/appointments/${id}`, { method: 'PATCH', body })
+      await reloadAppointments()
+    },
+    deleteAppointment: async (id) => {
+      await api(`/api/appointments/${id}`, { method: 'DELETE' })
+      setAppointments((xs) => xs.filter((x) => x.id !== id))
     },
   }
 
