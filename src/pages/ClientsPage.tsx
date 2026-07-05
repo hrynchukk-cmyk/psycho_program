@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Search, Mail } from 'lucide-react'
+import { CalendarPlus, Plus, Search, Mail } from 'lucide-react'
 import { useStore, formatDate, clientName } from '../data/store'
 import { Badge, Button, EmptyState, Field, Modal, PageHeader, inputCls } from '../components/ui'
+import { AppointmentModal, type ApptModalState } from '../components/appointments'
 import type { ClientStatus } from '../types'
 
 export const statusBadge = (s: ClientStatus) =>
@@ -14,18 +15,28 @@ export const statusBadge = (s: ClientStatus) =>
     <Badge tone="gray">Архів</Badge>
   )
 
+const fmtDateTime = (iso: string) =>
+  new Date(iso).toLocaleString('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+
 export default function ClientsPage() {
-  const { clients, groups, addClient } = useStore()
+  const { clients, groups, appointments, addClient } = useStore()
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState<'all' | ClientStatus>('all')
   const [showAdd, setShowAdd] = useState(false)
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '' })
+  const [booking, setBooking] = useState<ApptModalState | null>(null)
 
   const filtered = clients.filter((c) => {
     const matchesQuery = `${c.firstName} ${c.lastName} ${c.email}`.toLowerCase().includes(query.toLowerCase())
     const matchesFilter = filter === 'all' || c.status === filter
     return matchesQuery && matchesFilter
   })
+
+  // Найближчий запланований візит клієнта.
+  const nextVisit = (clientId: string) =>
+    appointments
+      .filter((a) => a.clientId === clientId && a.status === 'scheduled' && +new Date(a.startAt) >= Date.now())
+      .sort((a, b) => +new Date(a.startAt) - +new Date(b.startAt))[0]
 
   const invite = () => {
     if (!form.firstName || !form.email) return
@@ -68,18 +79,21 @@ export default function ClientsPage() {
         <EmptyState title="Клієнтів не знайдено" hint="Спробуйте змінити фільтри або додайте нового клієнта." />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <thead className="border-b border-gray-200 bg-gray-50 text-xs uppercase text-gray-500">
               <tr>
                 <th className="px-5 py-3 font-medium">Клієнт</th>
                 <th className="px-5 py-3 font-medium">Статус</th>
                 <th className="px-5 py-3 font-medium">Групи</th>
+                <th className="px-5 py-3 font-medium">Наступний візит</th>
                 <th className="px-5 py-3 font-medium">Доданий</th>
+                <th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.map((c) => {
                 const memberOf = groups.filter((g) => g.memberIds.includes(c.id))
+                const next = nextVisit(c.id)
                 return (
                   <tr key={c.id} className="hover:bg-gray-50">
                     <td className="px-5 py-3.5">
@@ -100,7 +114,22 @@ export default function ClientsPage() {
                     <td className="px-5 py-3.5 text-gray-600">
                       {memberOf.length === 0 ? '—' : memberOf.map((g) => g.name).join(', ')}
                     </td>
+                    <td className="px-5 py-3.5">
+                      {next ? (
+                        <span className="text-sm font-medium text-brand-700">{fmtDateTime(next.startAt)}</span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
+                      )}
+                    </td>
                     <td className="px-5 py-3.5 text-gray-600">{formatDate(c.createdAt)}</td>
+                    <td className="px-5 py-3.5 text-right">
+                      <button
+                        onClick={() => setBooking({ kind: 'new', clientId: c.id })}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+                      >
+                        <CalendarPlus size={14} /> Записати
+                      </button>
+                    </td>
                   </tr>
                 )
               })}
@@ -108,6 +137,8 @@ export default function ClientsPage() {
           </table>
         </div>
       )}
+
+      {booking && <AppointmentModal state={booking} onClose={() => setBooking(null)} />}
 
       {showAdd && (
         <Modal title="Запросити клієнта" onClose={() => setShowAdd(false)}>
