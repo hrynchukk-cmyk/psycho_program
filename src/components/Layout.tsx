@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import {
   LayoutDashboard,
   Users,
@@ -12,6 +12,7 @@ import {
   BookOpen,
   CalendarDays,
   HeartPulse,
+  KanbanSquare,
   Sparkles,
   Menu,
   X,
@@ -98,6 +99,14 @@ export default function Layout() {
           ))}
         </nav>
         <div className="border-t border-gray-200 px-3 py-4">
+          {/* Перемикач на спрощену CRM-версію (пацієнти + календар запису) */}
+          <Link
+            to="/crm"
+            onClick={() => setOpen(false)}
+            className="mb-3 flex items-center gap-3 rounded-lg border border-brand-200 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100"
+          >
+            <KanbanSquare size={17} /> CRM-версія
+          </Link>
           <div className="flex items-center gap-2.5 px-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-sm font-semibold uppercase text-violet-700">
               {initials}

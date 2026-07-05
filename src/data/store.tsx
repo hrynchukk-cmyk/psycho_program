@@ -66,7 +66,7 @@ interface Store {
   journal: JournalEntry[]
   appointments: Appointment[]
 
-  addClient: (c: Omit<Client, 'id' | 'createdAt'>) => Promise<void>
+  addClient: (c: Omit<Client, 'id' | 'createdAt'>) => Promise<Client>
   updateClient: (id: string, patch: Partial<Client>) => Promise<void>
   addGroup: (g: Omit<Group, 'id' | 'createdAt'>) => Promise<void>
   updateGroup: (id: string, patch: Partial<Group>) => Promise<void>
@@ -230,8 +230,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     appointments,
 
     addClient: async (c) => {
-      await api('/api/clients', { method: 'POST', body: { firstName: c.firstName, lastName: c.lastName, email: c.email } })
+      const created = adaptClient(
+        await api<any>('/api/clients', {
+          method: 'POST',
+          body: { firstName: c.firstName, lastName: c.lastName, email: c.email },
+        }),
+      )
       await reloadClients()
+      return created
     },
     updateClient: async (id, patch) => {
       const body: Record<string, unknown> = { ...patch }

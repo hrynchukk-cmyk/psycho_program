@@ -21,12 +21,24 @@ import NotesPage from './pages/NotesPage'
 import JournalPage from './pages/JournalPage'
 import CalendarPage from './pages/CalendarPage'
 import AiConsultPage from './pages/AiConsultPage'
+import CrmLayout, { CRM_ONLY } from './components/CrmLayout'
+import CrmCalendarPage from './pages/crm/CrmCalendarPage'
+import CrmPatientsPage from './pages/crm/CrmPatientsPage'
 
 const router = createHashRouter([
+  // CRM-версія: спрощений інтерфейс «пацієнти + календар запису».
+  {
+    element: <CrmLayout />,
+    children: [
+      { path: '/crm', element: <CrmCalendarPage /> },
+      { path: '/crm/patients', element: <CrmPatientsPage /> },
+    ],
+  },
   {
     element: <Layout />,
     children: [
-      { path: '/', element: <Navigate to="/dashboard" replace /> },
+      // У збірці CRM (VITE_APP_MODE=crm) стартуємо одразу в CRM.
+      { path: '/', element: <Navigate to={CRM_ONLY ? '/crm' : '/dashboard'} replace /> },
       { path: '/dashboard', element: <DashboardPage /> },
       { path: '/clients', element: <ClientsPage /> },
       { path: '/clients/:id', element: <ClientDetailPage /> },
